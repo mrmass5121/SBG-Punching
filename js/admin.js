@@ -405,6 +405,7 @@ function showSection(name) {
     production: "Production Records",
     daily: "Daily Track Record",
     marketing: "Marketing Upload",
+    customised: "Customised Designs",
     services: "Marketing Showcase",
     inquiries: "Inquiries",
     reviews: "Reviews"
@@ -636,7 +637,9 @@ async function saveProduction(event) {
   event.preventDefault();
   const form = event.currentTarget;
   const isMarketing = form.dataset.entryMode === "marketing";
-  const status = qs(isMarketing ? "#marketingStatus" : "#dailyStatus");
+  const isCustomised = form.dataset.entryMode === "customised";
+  const statusId = isCustomised ? "#customisedStatus" : (isMarketing ? "#marketingStatus" : "#dailyStatus");
+  const status = qs(statusId);
   const values = Object.fromEntries(new FormData(form).entries());
   status.textContent = "Saving entry...";
   loading(true);
@@ -647,7 +650,7 @@ async function saveProduction(event) {
     const material = values.material === "Others" ? values.material_other.trim() : values.material;
     const thickness = values.thickness === "Others" ? values.thickness_other.trim() : values.thickness;
     const quantity = Math.max(1, Number.parseInt(values.quantity, 10) || 1);
-    const isPublic = isMarketing ? values.is_public === "on" || values.featured === "on" : false;
+    const isPublic = (isMarketing || isCustomised) ? values.is_public === "on" || values.featured === "on" : false;
     if (isPublic && media.some(isPrivateMedia)) {
       status.textContent = "Preparing public media...";
       media = await ensurePublicMedia(media);
@@ -673,8 +676,10 @@ async function saveProduction(event) {
     syncOtherFields(form);
     setDefaultDate(form);
     if (form.elements.quantity) form.elements.quantity.value = "1";
-    status.textContent = usedQuantityFallback ? "Entry saved. Run the quantity database migration to store quantity as a real column." : (isMarketing ? "Marketing entry published." : "Daily record saved with media.");
-    toast(usedQuantityFallback ? "Saved with quantity fallback because the database column is missing." : (isMarketing ? "Marketing entry synced to the public website." : "Daily production record saved privately."));
+    const successMsg = usedQuantityFallback ? "Entry saved. Run the quantity database migration to store quantity as a real column." : isCustomised ? "Customised design published to the gallery." : isMarketing ? "Marketing entry published." : "Daily record saved with media.";
+    const toastMsg = usedQuantityFallback ? "Saved with quantity fallback because the database column is missing." : isCustomised ? "Customised design synced to the public gallery." : isMarketing ? "Marketing entry synced to the public website." : "Daily production record saved privately.";
+    status.textContent = successMsg;
+    toast(toastMsg);
     showSection("production");
     await loadProductions();
   } catch (error) {
@@ -688,13 +693,22 @@ function editProduction(id) {
   if (!isFullAdmin()) return toast("Standard users can upload new productions only.");
   const item = productions.find(row => row.id === id);
   if (!item) return;
-  showSection(item.is_public ? "marketing" : "daily");
-  const form = qs(item.is_public ? "#marketingForm" : "#dailyForm");
-  ["id", "title", "customer_name", "category", "status", "production_date", "description"].forEach(name => { form.elements[name].value = item[name] || ""; });
+  const isCustomised = item.category === "Customised Designs";
+  const section = isCustomised ? "customised" : (item.is_public ? "marketing" : "daily");
+  const formId = isCustomised ? "#customisedForm" : (item.is_public ? "#marketingForm" : "#dailyForm");
+  showSection(section);
+  const form = qs(formId);
+  ["id", "title", "customer_name", "status", "production_date", "description"].forEach(name => { form.elements[name].value = item[name] || ""; });
+  if (form.elements.category) form.elements.category.value = item.category || "";
+  if (form.elements.design_type) {
+    const designTypeOptions = ["Custom Fabrication","Custom Rack","Custom Bracket","Custom Panel","Custom Enclosure","Others"];
+    form.elements.design_type.value = item.design_type || item.tags?.find(t => designTypeOptions.includes(t)) || "Custom Fabrication";
+  }
   if (form.elements.quantity) form.elements.quantity.value = productionQuantity(item);
   setSelectOrOther(form.elements.material, item.material, form.elements.material_other);
   setSelectOrOther(form.elements.thickness, item.thickness, form.elements.thickness_other);
-  form.elements.tags.value = stripQuantityTags(item.tags || []).join(", ");
+  const internalTags = ["customised-design", "custom-design"];
+  form.elements.tags.value = stripQuantityTags(item.tags || []).filter(t => !internalTags.includes(t)).join(", ");
   if (form.elements.is_public?.type === "checkbox") form.elements.is_public.checked = Boolean(item.is_public);
   if (form.elements.featured?.type === "checkbox") form.elements.featured.checked = Boolean(item.featured);
   uploadedMedia = item.media || [];

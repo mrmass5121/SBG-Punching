@@ -3739,7 +3739,6 @@ function productQuoteMessage(product){
   ].join('\n');
 }
 function quoteClickInquiry(product){
-  const imageUrl=absoluteUrl(productImage(product));
   const productUrl=currentProductUrl(product);
   return {
     company_name:'Website product quote click',
@@ -3753,13 +3752,11 @@ function quoteClickInquiry(product){
       productMessageDetails(product),
       '',
       `Product URL: ${productUrl}`,
-      imageUrl?`Product Image: ${imageUrl}`:'',
       '',
       'Contact details were not collected on this quick quote click. Check WhatsApp for the customer message.'
     ].filter(Boolean).join('\n').slice(0,1200),
     source:'production-gallery',
-    product_url:productUrl,
-    image_url:imageUrl
+    product_url:productUrl
   };
 }
 function logQuoteClick(product){
@@ -3772,8 +3769,8 @@ function logQuoteClick(product){
   sbgClient.from('inquiries').insert(payload).then(({error})=>{
     if(!error)return;
     const message=String(error.message||'');
-    if(message.includes('image_url')||message.includes('product_url')){
-      const {image_url,product_url,...basicPayload}=payload;
+    if(message.includes('product_url')){
+      const {product_url,...basicPayload}=payload;
       sbgClient.from('inquiries').insert(basicPayload).then(({error:retryError})=>{
         if(retryError)console.warn('Quote click inquiry log failed:',retryError.message||retryError);
       });

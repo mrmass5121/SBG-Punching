@@ -4404,6 +4404,21 @@ async function submitForm(){
   }
   const button=document.querySelector('.btn-submit');
   if(button){button.disabled=true;button.textContent='Sending...'}
+  const waMsg=encodeURIComponent(
+    `New Enquiry - SBG Website\n\n`+
+    `Name: ${name}\n`+
+    `Company: ${company||'N/A'}\n`+
+    `Phone: ${phone}\n`+
+    `Email: ${email||'N/A'}\n`+
+    `Service: ${service}\n`+
+    `Material: ${material||'N/A'}\n`+
+    `Message: ${message}`
+  );
+  const openInquiryWhatsapp=()=>{
+    window.open(`https://wa.me/${SBG_CFG.whatsappNumber||'918892181792'}?text=${waMsg}`,'_blank','noopener');
+    document.getElementById('formBody').style.display='none';
+    document.getElementById('formSuccess').style.display='block';
+  };
 
   try{
     const inquiryPayload={
@@ -4432,23 +4447,16 @@ async function submitForm(){
     }
     localStorage.setItem('sbg_last_inquiry',String(Date.now()));
     resetCaptcha('inquiry',document);
-
-    const waMsg=encodeURIComponent(
-      `New Enquiry - SBG Website\n\n`+
-      `Name: ${name}\n`+
-      `Company: ${company||'N/A'}\n`+
-      `Phone: ${phone}\n`+
-      `Email: ${email||'N/A'}\n`+
-      `Service: ${service}\n`+
-      `Material: ${material||'N/A'}\n`+
-      `Message: ${message}`
-    );
-    window.open(`https://wa.me/${SBG_CFG.whatsappNumber||'918892181792'}?text=${waMsg}`,'_blank','noopener');
-    document.getElementById('formBody').style.display='none';
-    document.getElementById('formSuccess').style.display='block';
+    openInquiryWhatsapp();
   }catch(error){
     console.error('Inquiry submit failed:',error);
     resetCaptcha('inquiry',document);
+    const errorText=String(error?.message||error||'');
+    if(errorText.includes('Please wait before submitting another inquiry')||errorText.includes('P0001')){
+      localStorage.setItem('sbg_last_inquiry',String(Date.now()));
+      openInquiryWhatsapp();
+      return;
+    }
     alert(error.message||'Could not submit right now. Please call or WhatsApp us directly.');
   }finally{
     if(button){button.disabled=false;button.textContent='Send Enquiry via WhatsApp →'}

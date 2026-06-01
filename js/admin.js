@@ -359,6 +359,7 @@ function bindDashboardUi() {
   bindConditionalFields();
   bindLightbox();
   bindMediaUpload();
+  bindUploadActions();
   bindMarketingVisibility();
   qsa("[data-entry-mode]").forEach(form => {
     form.addEventListener("submit", saveProduction);
@@ -385,15 +386,16 @@ function applyRoleAccess() {
 }
 
 function bindMarketingVisibility() {
-  const form = qs("#marketingForm");
-  const publicInput = form?.elements?.is_public;
-  const featuredInput = form?.elements?.featured;
-  if (!form || !publicInput || !featuredInput) return;
-  featuredInput.addEventListener("change", () => {
-    if (featuredInput.checked) publicInput.checked = true;
-  });
-  publicInput.addEventListener("change", () => {
-    if (!publicInput.checked) featuredInput.checked = false;
+  qsa("#marketingForm, #customisedForm").forEach(form => {
+    const publicInput = form?.elements?.is_public;
+    const featuredInput = form?.elements?.featured;
+    if (!publicInput || !featuredInput) return;
+    featuredInput.addEventListener("change", () => {
+      if (featuredInput.checked) publicInput.checked = true;
+    });
+    publicInput.addEventListener("change", () => {
+      if (!publicInput.checked) featuredInput.checked = false;
+    });
   });
 }
 
@@ -569,7 +571,17 @@ function bindMediaUpload() {
   });
 }
 
+function bindUploadActions() {
+  qsa("[data-clear-media]").forEach(button => {
+    button.addEventListener("click", () => clearSelectedMedia(button.closest("form")));
+  });
+  qsa("[data-remove-current]").forEach(button => {
+    button.addEventListener("click", () => removeCurrentProduction(button.closest("form"), button));
+  });
+}
+
 function selectFiles(fileList, form) {
+  if (mediaForm !== form) uploadedMedia = [];
   mediaForm = form;
   selectedMedia = [...fileList].filter(file => {
     if (!allowedTypes.has(file.type)) {
@@ -597,7 +609,7 @@ function renderSelectedMedia(form) {
 }
 
 async function uploadSelectedMedia(form) {
-  if (!selectedMedia.length) return uploadedMedia;
+  if (!selectedMedia.length) return [];
   const progress = qs("[data-upload-progress]", form);
   const output = [];
   const isPrivate = form?.dataset.entryMode === "daily";
@@ -646,11 +658,17 @@ async function saveProduction(event) {
   try {
     const existing = productions.find(item => item.id === values.id);
     const hasNewMedia = mediaForm === form && selectedMedia.length;
-    let media = mediaForm === form ? (hasNewMedia ? [...uploadedMedia, ...await uploadSelectedMedia(form)] : uploadedMedia) : (existing?.media || []);
+    const baseMedia = values.id ? (mediaForm === form ? uploadedMedia : (existing?.media || [])) : [];
+    let media = hasNewMedia ? [...baseMedia, ...await uploadSelectedMedia(form)] : baseMedia;
     const material = values.material === "Others" ? values.material_other.trim() : values.material;
     const thickness = values.thickness === "Others" ? values.thickness_other.trim() : values.thickness;
     const quantity = Math.max(1, Number.parseInt(values.quantity, 10) || 1);
     const isPublic = (isMarketing || isCustomised) ? values.is_public === "on" || values.featured === "on" : false;
+    const rawTags = values.tags ? stripQuantityTags(values.tags.split(",").map(tag => tag.trim()).filter(Boolean)) : [];
+    const designType = String(values.design_type || "").trim();
+    const tags = isCustomised
+      ? [...new Set(["customised-design", "custom-design", designType, ...rawTags].filter(Boolean))].slice(0, 12)
+      : rawTags.slice(0, 12);
     if (isPublic && media.some(isPrivateMedia)) {
       status.textContent = "Preparing public media...";
       media = await ensurePublicMedia(media);
@@ -665,9 +683,9 @@ async function saveProduction(event) {
       status: values.status,
       production_date: values.production_date,
       description: values.description.trim(),
-      tags: values.tags ? stripQuantityTags(values.tags.split(",").map(tag => tag.trim()).filter(Boolean)).slice(0, 12) : [],
+      tags,
       is_public: isPublic,
-      featured: isMarketing ? values.featured === "on" : false,
+      featured: (isMarketing || isCustomised) ? values.featured === "on" : false,
       media: media.length ? media : (existing?.media || [])
     };
     const { usedQuantityFallback } = await persistProduction(payload, values.id);
@@ -743,6 +761,61 @@ async function deleteProduction(id) {
   const { error } = await supabase.from("productions").delete().eq("id", id);
   if (error) return toast(error.message);
   toast("Production entry deleted.");
+  await loadProductions();
+}
+
+function formStatus(form) {
+  return qs(".form-status", form) || qs(`#${form?.dataset?.entryMode || ""}Status`);
+}
+
+function setFormStatus(form, message) {
+  const status = formStatus(form);
+  if (status) status.textContent = message;
+}
+
+function clearSelectedMedia(form) {
+  if (!form) return;
+  if (mediaForm === form) selectedMedia = [];
+  qsa("[data-media-input]", form).forEach(input => { input.value = ""; });
+  qsa("[data-upload-progress]", form).forEach(progress => { progress.style.width = "0%"; });
+  if (mediaForm === form && uploadedMedia.length) {
+    renderUploadedMedia(form, { title: form.elements.title?.value || "Production media" });
+  } else {
+    qsa("[data-media-preview]", form).forEach(preview => { preview.innerHTML = ""; });
+  }
+  setFormStatus(form, uploadedMedia.length && mediaForm === form ? "New media selection removed. Saved media will stay attached." : "Media selection removed.");
+}
+
+async function removeCurrentProduction(form, button) {
+  if (!form) return;
+  if (!isFullAdmin()) return toast("Standard users cannot delete production records.");
+  const id = form.elements.id?.value;
+  if (!id) {
+    form.reset();
+    resetMedia(form);
+    syncOtherFields(form);
+    setDefaultDate(form);
+    if (form.elements.quantity) form.elements.quantity.value = "1";
+    setFormStatus(form, "Ready to add a new entry.");
+    return;
+  }
+  if (!confirm("Delete this production entry?")) return;
+  button.disabled = true;
+  setFormStatus(form, "Deleting entry...");
+  const { error } = await supabase.from("productions").delete().eq("id", id);
+  button.disabled = false;
+  if (error) {
+    setFormStatus(form, error.message);
+    return toast(error.message);
+  }
+  form.reset();
+  resetMedia(form);
+  syncOtherFields(form);
+  setDefaultDate(form);
+  if (form.elements.quantity) form.elements.quantity.value = "1";
+  setFormStatus(form, "Entry deleted.");
+  toast("Production entry deleted.");
+  showSection("production");
   await loadProductions();
 }
 

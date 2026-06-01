@@ -422,6 +422,7 @@ async function loadProductions() {
   renderFilterOptions();
   renderDashboard();
   renderAdminGallery();
+  if (inquiries.length) renderInquiries();
   repairPublicMediaRecords();
 }
 
@@ -1023,6 +1024,27 @@ function inquiryProductUrl(item) {
   return match ? match[1] : "";
 }
 
+function inquiryProductSlug(item) {
+  const url = inquiryProductUrl(item);
+  if (!url) return "";
+  try {
+    const parsed = new URL(url, location.origin);
+    const productPath = parsed.pathname.match(/\/products\/([^/?#]+)/i);
+    if (productPath) return decodeURIComponent(productPath[1]);
+    const productParam = parsed.searchParams.get("product");
+    if (productParam) return productParam;
+  } catch (error) {}
+  return "";
+}
+
+function inquiryProduct(item) {
+  const slug = inquiryProductSlug(item);
+  const service = String(item?.service || "").trim().toLowerCase();
+  return productions.find(product => slug && productReviewKey(product) === slug)
+    || productions.find(product => service && String(product.title || "").trim().toLowerCase() === service)
+    || null;
+}
+
 function inquiryMessage(item, isGalleryQuote) {
   const lines = String(item?.message || "")
     .split(/\r?\n/)
@@ -1050,6 +1072,7 @@ function renderInquiries() {
     const isGalleryQuote = ["production-gallery", "gallery-quote-click", "quote-click"].includes(item.source);
     const sourceLabel = isGalleryQuote ? "Production Gallery" : "Contact Section";
     const productUrl = inquiryProductUrl(item);
+    const product = inquiryProduct(item);
     const message = inquiryMessage(item, isGalleryQuote);
     const contactMeta = [
       item.company_name,
@@ -1057,7 +1080,7 @@ function renderInquiries() {
       item.email
     ].filter(Boolean).map(esc).join("<br>");
 
-    const previewCell = `<span class="table-thumb empty"><i data-lucide="image-off"></i></span>`;
+    const previewCell = product ? previewButton(product, "table-thumb") : `<span class="table-thumb empty"><i data-lucide="image-off"></i></span>`;
     const linkCell = productUrl
       ? `<a href="${esc(productUrl)}" target="_blank" rel="noopener noreferrer">Open Product</a>`
       : `<span class="readonly-note">-</span>`;

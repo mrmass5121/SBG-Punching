@@ -325,7 +325,7 @@ h3 { font-size: clamp(1.65rem, 3vw, 2.35rem); }
   align-items: center;
 }
 .section-copy p, .section-head p { color: var(--muted); max-width: 720px; }
-.section-head { display: grid; gap: 14px; max-width: 900px; margin-bottom: 34px; }
+.section-head { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%; margin-bottom: 34px; }
 .spec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .spec-grid strong { display: block; margin-top: 6px; font-size: 1rem; }
 

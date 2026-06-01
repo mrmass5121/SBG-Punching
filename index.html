@@ -23,7 +23,6 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"S.B.G. Punching","description":"CNC Punching, Laser Cutting, Sheet Metal Fabrication and Control Panels in Bangalore","telephone":"+918892181792","email":"sbgpunching@gmail.com","address":{"@type":"PostalAddress","streetAddress":"#61/16, Katha No. 501/1093, Nadakerappa Industrial Estate, Hegganahalli","addressLocality":"Bangalore","postalCode":"560091","addressCountry":"IN"},"openingHours":"Mo-Sa 09:00-18:00","priceRange":"₹₹"}</script>
 <title>S.B.G. PUNCHING — CNC Punching & Sheet Metal Fabrication, Bangalore</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="sbg-logo.png">
 <link rel="icon" type="image/png" sizes="192x192" href="sbg-logo.png">
 <link rel="apple-touch-icon" sizes="180x180" href="sbg-logo.png">
 <link rel="canonical" href="https://www.sbgpunching.in/">
@@ -93,41 +92,7 @@ textarea:focus-visible{
 
 
 
-/* ═══════════════════════════════════════
-   INTRO SPLASH
-═══════════════════════════════════════ */
-#intro{
-  position:fixed;inset:0;z-index:9999;
-  background:var(--bg);display:flex;
-  align-items:center;justify-content:center;
-  flex-direction:column;gap:24px;
-  transition:opacity .5s ease,visibility .5s ease;
-}
-#intro.hidden{opacity:0;visibility:hidden}
-.intro-logo-text{
-  font-family:var(--ff-display);
-  font-size:clamp(2.5rem,6vw,5rem);
-  letter-spacing:.2em;color:var(--text);
-  opacity:0;animation:introFadeUp .5s .5s forwards;
-}
-.intro-logo-text span{color:var(--green)}
-.intro-tagline{
-  font-family:var(--ff-mono);font-size:.7rem;
-  letter-spacing:.4em;color:var(--steel);
-  opacity:0;animation:introFadeUp .5s .5s forwards;
-}
-.intro-bar{
-  width:200px;height:2px;background:var(--border);
-  overflow:hidden;border-radius:2px;
-  opacity:0;animation:introFadeUp .5s .5s forwards;
-}
-.intro-bar-fill{
-  height:100%;width:0;background:var(--green);
-  box-shadow:0 0 12px var(--green);
-  animation:introLoad 0.8s 0.8s cubic-bezier(.4,0,.2,1) forwards;
-}
-@keyframes introFadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes introLoad{from{width:0}to{width:100%}}
+/* intro splash removed — permanently hidden by Lighthouse patch */
 
 /* ═══════════════════════════════════════
    MOBILE MENU
@@ -203,19 +168,7 @@ header.scrolled{
 }
 .hamburger:hover span{background:var(--green)}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-mark{
-  width:38px;height:38px;background:var(--green);
-  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--ff-display);font-size:1rem;color:#000;
-  flex-shrink:0;
-}
-.logo-text{line-height:1.1}
-.logo-name{
-  font-family:var(--ff-display);font-size:1.25rem;
-  letter-spacing:.12em;color:var(--text);
-}
-.logo-sub{font-size:.6rem;letter-spacing:.3em;color:var(--steel);font-family:var(--ff-mono)}
+/* logo-mark/logo-text removed: header uses img tag */
 .sbg-logo-fallback{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border:1px solid var(--border-green);border-radius:8px;background:rgba(0,200,83,.08);color:var(--green);font-family:var(--ff-display);font-size:1.25rem;letter-spacing:.12em;line-height:1;white-space:nowrap;}
 .logo .sbg-logo-fallback{height:44px;}
 footer .sbg-logo-fallback{height:48px;margin-bottom:12px;filter:brightness(1.1);}
@@ -1490,43 +1443,7 @@ nav{display:flex;align-items:center;gap:4px}
   top: 16px;
   right: 70px;
 }
-.shop-buy-box{
-  align-self:start;
-  margin:24px 20px 20px 0;
-  padding:18px;
-  border:1px solid #d5d9d9;
-  border-radius:8px;
-  background:#fff;
-  color:#111827;
-}
-.shop-buy-box h4{margin:0 0 10px;font-size:1rem}
-.shop-buy-box p{margin:0 0 12px;color:#374151;line-height:1.55;font-size:.9rem}
-.shop-buy-box strong{display:block;margin-bottom:10px;color:#168a3a;font-size:1.1rem}
-.shop-buy-box a,
-.shop-buy-box button{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  min-height:42px;
-  margin-top:10px;
-  border:0;
-  border-radius:999px;
-  color:#111827;
-  font-family:var(--ff-body);
-  font-weight:800;
-  cursor:pointer;
-}
-.shop-buy-box a{background:#ffd814}
-.shop-buy-box button{background:#ffa41c}
-.shop-buy-box button.active{
-  background:#16a34a;
-  color:#fff;
-}
-.shop-buy-box .shop-share-btn{
-  background:#111827;
-  color:#fff;
-}
+/* .shop-buy-box removed: not used in any rendered template */
 .shop-related{
   margin-top:14px;
   padding:18px;
@@ -2061,7 +1978,6 @@ footer{
 .mobile-cta{
   display:none;
   position:fixed;bottom:0;left:0;right:0;z-index:700;
-  display:none;
   grid-template-columns:1fr 1fr 1fr;
   border-top:1px solid var(--border);
   background:rgba(11,15,20,.95);
@@ -2270,12 +2186,7 @@ footer{
 <body>
 <a class="skip-link" href="#mainContent">Skip to content</a>
 
-<!-- INTRO SPLASH -->
-<div id="intro" aria-hidden="true">
-  <div class="intro-logo-text">S.B.G. <span>PUNCHING</span></div>
-  <div class="intro-tagline">PRECISION · QUALITY · TRUST</div>
-  <div class="intro-bar"><div class="intro-bar-fill"></div></div>
-</div>
+<!-- intro splash removed (permanently hidden) -->
 
 <!-- MOBILE MENU -->
 <div id="mobileOverlay" onclick="closeMobileMenu()" hidden aria-hidden="true"></div>
@@ -3274,9 +3185,7 @@ function serverlessEndpoint(name){
   return `${SERVERLESS_BASE_URL}/${name}`;
 }
 
-/* Image logo only: no text fallback replacement.
-   Keep your real logo file at img/sbg-logo.png. */
-function attachSbgLogoFallbacks(){ return; }
+
 
 
 function escHTML(value){

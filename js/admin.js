@@ -1016,23 +1016,51 @@ function renderServices() {
   window.lucide?.createIcons();
 }
 
+function inquiryProductUrl(item) {
+  const direct = String(item?.product_url || "").trim();
+  if (direct) return direct;
+  const match = String(item?.message || "").match(/Product URL:\s*(https?:\/\/\S+)/i);
+  return match ? match[1] : "";
+}
+
+function inquiryMessage(item, isGalleryQuote) {
+  const lines = String(item?.message || "")
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line =>
+      line &&
+      !/^Product URL:/i.test(line) &&
+      !/^Product Image:/i.test(line) &&
+      !/^Contact details were not collected/i.test(line)
+    );
+  if (!isGalleryQuote) return lines.join(" ").slice(0, 260);
+  const product = lines.find(line => /^Product:/i.test(line))?.replace(/^Product:\s*/i, "");
+  const category = lines.find(line => /^Category:/i.test(line))?.replace(/^Category:\s*/i, "");
+  const material = lines.find(line => /^Material:/i.test(line))?.replace(/^Material:\s*/i, "");
+  const summary = [
+    product ? `Quote requested for ${product}` : "Quote requested from production gallery",
+    category ? `Category: ${category}` : "",
+    material ? `Material: ${material}` : ""
+  ].filter(Boolean).join(". ");
+  return summary.slice(0, 260);
+}
+
 function renderInquiries() {
   qs("#inquiryRows").innerHTML = inquiries.map(item => {
     const isGalleryQuote = ["production-gallery", "gallery-quote-click", "quote-click"].includes(item.source);
     const sourceLabel = isGalleryQuote ? "Production Gallery" : "Contact Section";
+    const productUrl = inquiryProductUrl(item);
+    const message = inquiryMessage(item, isGalleryQuote);
     const contactMeta = [
       item.company_name,
       isGalleryQuote ? "Phone not collected" : item.phone,
       item.email
     ].filter(Boolean).map(esc).join("<br>");
 
-    // Show image only for gallery quote clicks that have an image_url; nothing for contact form inquiries
-    let previewCell;
-    if (isGalleryQuote && item.image_url) {
-      previewCell = `<button class="table-thumb" type="button" onclick="window.open('${esc(item.image_url)}','_blank','noopener')" aria-label="View product image"><img src="${esc(item.image_url)}" alt="${esc(item.service || 'Product')}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:4px;"></button>`;
-    } else {
-      previewCell = `<span class="table-thumb empty"><i data-lucide="image-off"></i></span>`;
-    }
+    const previewCell = `<span class="table-thumb empty"><i data-lucide="image-off"></i></span>`;
+    const linkCell = productUrl
+      ? `<a href="${esc(productUrl)}" target="_blank" rel="noopener noreferrer">Open Product</a>`
+      : `<span class="readonly-note">-</span>`;
 
     return `
     <tr>
@@ -1040,7 +1068,8 @@ function renderInquiries() {
       <td><strong>${esc(item.contact_name)}</strong>${isGalleryQuote ? `<br><span class="status-pill queued">Product quote click</span>` : ""}${contactMeta ? `<br>${contactMeta}` : ""}</td>
       <td>${esc(sourceLabel)}</td>
       <td>${esc(item.service)}</td>
-      <td>${esc(item.message)}</td>
+      <td>${linkCell}</td>
+      <td>${esc(message)}</td>
       <td>${formatDate(item.created_at || item.updated_at)}</td>
       <td><span class="status-pill ${statusClass(item.status || "New")}">${esc(item.status || "New")}</span></td>
       <td>
@@ -1051,7 +1080,7 @@ function renderInquiries() {
       </td>
     </tr>
   `;
-  }).join("") || `<tr><td colspan="8">No inquiries yet.</td></tr>`;
+  }).join("") || `<tr><td colspan="9">No inquiries yet.</td></tr>`;
   qsa("[data-inquiry]").forEach(btn => btn.addEventListener("click", () => markInquiry(btn.dataset.inquiry)));
   qsa("[data-delete-inquiry]").forEach(btn => btn.addEventListener("click", () => deleteInquiry(btn.dataset.deleteInquiry)));
   bindPreviewButtons();

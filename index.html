@@ -26,11 +26,14 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="//www.google.com">
+<link rel="dns-prefetch" href="//wa.me">
+<link rel="dns-prefetch" href="//challenges.cloudflare.com">
 <link rel="stylesheet"
 href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=block">
 <link rel="preload" href="css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="css/style.css"></noscript>
-<link rel="preload" as="image" href="img/sbg-logo.png" fetchpriority="high" type="image/webp">
+<link rel="preload" as="image" href="img/sbg-logo.png" fetchpriority="high" type="image/png">
 <style>
 /* ═══════════════════════════════════════
    RESET & BASE
@@ -66,6 +69,22 @@ a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
 ul{list-style:none}
 button{cursor:pointer;border:none;background:none;font-family:var(--ff-body)}
+.skip-link{
+  position:fixed;left:12px;top:12px;z-index:10000;
+  transform:translateY(-140%);
+  padding:10px 14px;border-radius:8px;
+  background:var(--green);color:#031008;
+  font-weight:800;
+}
+.skip-link:focus{transform:translateY(0)}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible{
+  outline:2px solid var(--green);
+  outline-offset:3px;
+}
 
 
 
@@ -2244,20 +2263,21 @@ footer{
 </style>
 </head>
 <body>
+<a class="skip-link" href="#mainContent">Skip to content</a>
 
 <!-- INTRO SPLASH -->
-<div id="intro">
+<div id="intro" aria-hidden="true">
   <div class="intro-logo-text">S.B.G. <span>PUNCHING</span></div>
   <div class="intro-tagline">PRECISION · QUALITY · TRUST</div>
   <div class="intro-bar"><div class="intro-bar-fill"></div></div>
 </div>
 
 <!-- MOBILE MENU -->
-<div id="mobileOverlay" onclick="closeMobileMenu()"></div>
-<div id="mobileMenu">
+<div id="mobileOverlay" onclick="closeMobileMenu()" hidden aria-hidden="true"></div>
+<div id="mobileMenu" role="dialog" aria-modal="true" aria-labelledby="mobileMenuTitle" hidden>
   <div class="mob-header">
-    <div class="mob-brand">SBG</div>
-    <button class="mob-close" onclick="closeMobileMenu()">✕</button>
+    <div class="mob-brand" id="mobileMenuTitle">SBG</div>
+    <button class="mob-close" type="button" onclick="closeMobileMenu()" aria-label="Close menu">✕</button>
   </div>
   <div class="mob-links">
     <a href="#" onclick="closeMobileMenu()">Home</a>
@@ -2275,14 +2295,14 @@ footer{
 <header id="mainHeader">
   <div class="header-inner">
     <div class="header-left">
-      <button class="hamburger" onclick="openMobileMenu()" aria-label="Open menu">
+      <button class="hamburger" type="button" onclick="openMobileMenu()" aria-label="Open menu" aria-controls="mobileMenu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
       <a href="#" class="logo">
         <img class="sbg-logo-img" src="img/sbg-logo.png" width="807" height="175" loading="eager" decoding="async" fetchpriority="high" alt="SBG Groups Logo" style="height:44px;width:auto;display:block;">
       </a>
     </div>
-    <nav>
+    <nav aria-label="Primary navigation">
       <a class="nav-link" href="#services">Services</a>
       <a class="nav-link" href="#capabilities">Capabilities</a>
       <a class="nav-link" href="#process">Process</a>
@@ -2299,18 +2319,19 @@ footer{
     </div>
   </div>
 </header>
+<main id="mainContent" tabindex="-1">
 
 <!-- ═══════════ HERO ═══════════ -->
-<section class="hero">
-  <canvas id="heroCanvas"></canvas>
-  <div class="hero-grid"></div>
-  <div class="hero-scan"></div>
-  <div class="hero-noise"></div>
-  <div class="hero-glow-orb"></div>
+<section class="hero" aria-labelledby="heroTitle">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-scan" aria-hidden="true"></div>
+  <div class="hero-noise" aria-hidden="true"></div>
+  <div class="hero-glow-orb" aria-hidden="true"></div>
 
   <div class="hero-content">
     <div class="hero-badge">Bangalore's Precision Metal Experts</div>
-    <h1 class="hero-headline">
+    <h1 class="hero-headline" id="heroTitle">
       <span class="line1">Precision</span>
       <span class="line2">Fabrication</span>
     </h1>
@@ -2782,7 +2803,7 @@ footer{
 </section>
 
 <!-- LIGHTBOX -->
-<div id="lightbox">
+<div id="lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Production details">
   <button class="lb-close" onclick="closeLightbox()" aria-label="Close production details">✕</button>
   <button class="lb-nav lb-prev" onclick="event.stopPropagation();lightboxNav(-1)">&#8592;</button>
   <div class="lb-inner" id="productDetail" onclick="event.stopPropagation()"></div>
@@ -2829,28 +2850,28 @@ footer{
             <div class="form-title">GET FREE QUOTE</div>
             <div class="form-row">
               <div class="form-group">
-                <label>Your Name *</label>
-                <input type="text" id="fname" placeholder="Rajesh Kumar" required>
+                <label for="fname">Your Name *</label>
+                <input type="text" id="fname" name="name" placeholder="Rajesh Kumar" autocomplete="name" maxlength="140" required>
               </div>
               <div class="form-group">
-                <label>Company Name</label>
-                <input type="text" id="fcompany" placeholder="ABC Industries">
+                <label for="fcompany">Company Name</label>
+                <input type="text" id="fcompany" name="company" placeholder="ABC Industries" autocomplete="organization" maxlength="140">
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label>Phone Number *</label>
-                <input type="tel" id="fphone" placeholder="Enter phone number" required>
+                <label for="fphone">Phone Number *</label>
+                <input type="tel" id="fphone" name="phone" placeholder="Enter phone number" autocomplete="tel" inputmode="tel" maxlength="40" required>
               </div>
               <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" id="femail" placeholder="rajesh@company.com">
+                <label for="femail">Email Address</label>
+                <input type="email" id="femail" name="email" placeholder="rajesh@company.com" autocomplete="email" maxlength="180">
               </div>
             </div>
             <div class="form-row">
               <div class="form-group full">
-                <label>Service Required *</label>
-                <select id="fservice" required>
+                <label for="fservice">Service Required *</label>
+                <select id="fservice" name="service" required>
                   <option value="">— Select a service —</option>
                   <option>CNC Punching</option>
                   <option>Laser Cutting</option>
@@ -2864,18 +2885,18 @@ footer{
             </div>
             <div class="form-row">
               <div class="form-group full">
-                <label>Material &amp; Thickness</label>
-                <input type="text" id="fmaterial" placeholder="e.g. MS 2mm, SS 304 1.5mm">
+                <label for="fmaterial">Material &amp; Thickness</label>
+                <input type="text" id="fmaterial" name="material" placeholder="e.g. MS 2mm, SS 304 1.5mm" maxlength="160">
               </div>
             </div>
             <div class="form-row">
               <div class="form-group full">
-                <label>Your Requirements *</label>
-                <textarea id="fmessage" rows="4" placeholder="Describe your requirement — quantity, dimensions, deadline…" required></textarea>
+                <label for="fmessage">Your Requirements *</label>
+                <textarea id="fmessage" name="message" rows="4" placeholder="Describe your requirement — quantity, dimensions, deadline…" maxlength="1200" required></textarea>
               </div>
             </div>
             <div class="captcha-field" data-turnstile="inquiry"></div>
-            <button class="btn-submit" onclick="submitForm()">Send Enquiry via WhatsApp →</button>
+            <button class="btn-submit" type="button" onclick="submitForm()">Send Enquiry via WhatsApp →</button>
             <p class="form-note">* Clicking Send will open WhatsApp with your details pre-filled.</p>
           </div>
         </div>
@@ -2890,7 +2911,7 @@ footer{
     <div class="map-wrap">
       <iframe
         src="https://www.google.com/maps?q=S.B.G%20PUNCHING%2C%20Nadakerappa%20Industrial%20Estate%2C%20Hegganahalli%2C%20Bengaluru&ll=13.0049956,77.4964631&z=17&output=embed"
-        width="100%" height="360" style="border:0;display:block;" allowfullscreen="" loading="lazy"
+        width="100%" height="360" style="border:0;display:block;" allowfullscreen="" loading="lazy" fetchpriority="low"
         referrerpolicy="no-referrer-when-downgrade" title="SBG Punching Location">
       </iframe>
     </div>
@@ -2899,6 +2920,7 @@ footer{
 </section>
 
 <!-- ═══════════ FOOTER ═══════════ -->
+</main>
 <footer>
   <div class="footer-grid">
     <div>
@@ -2975,17 +2997,29 @@ document.getElementById('intro')?.classList.add('hidden');
 /* ─── HEADER SCROLL ─── */
 const header=document.getElementById('mainHeader');
 window.addEventListener('scroll',()=>{
-  header.classList.toggle('scrolled',window.scrollY>60);
-});
+  header?.classList.toggle('scrolled',window.scrollY>60);
+},{passive:true});
 
 /* ─── MOBILE MENU ─── */
 function openMobileMenu(){
-  document.getElementById('mobileMenu').classList.add('open');
-  document.getElementById('mobileOverlay').classList.add('open');
+  const menu=document.getElementById('mobileMenu');
+  const overlay=document.getElementById('mobileOverlay');
+  menu?.removeAttribute('hidden');
+  overlay?.removeAttribute('hidden');
+  menu?.classList.add('open');
+  overlay?.classList.add('open');
+  document.querySelector('.hamburger')?.setAttribute('aria-expanded','true');
 }
 function closeMobileMenu(){
-  document.getElementById('mobileMenu').classList.remove('open');
-  document.getElementById('mobileOverlay').classList.remove('open');
+  const menu=document.getElementById('mobileMenu');
+  const overlay=document.getElementById('mobileOverlay');
+  menu?.classList.remove('open');
+  overlay?.classList.remove('open');
+  setTimeout(()=>{
+    if(!menu?.classList.contains('open'))menu?.setAttribute('hidden','');
+    if(!overlay?.classList.contains('open'))overlay?.setAttribute('hidden','');
+  },360);
+  document.querySelector('.hamburger')?.setAttribute('aria-expanded','false');
 }
 
 /* ─── HERO PARTICLES ─── */
@@ -2996,10 +3030,14 @@ function closeMobileMenu(){
   const ctx=canvas.getContext('2d');
   let W,H,particles=[];
   function resize(){
-    W=canvas.width=canvas.offsetWidth;
-    H=canvas.height=canvas.offsetHeight;
+    const dpr=Math.min(window.devicePixelRatio||1,1.5);
+    W=canvas.offsetWidth;
+    H=canvas.offsetHeight;
+    canvas.width=Math.max(1,Math.floor(W*dpr));
+    canvas.height=Math.max(1,Math.floor(H*dpr));
+    ctx.setTransform(dpr,0,0,dpr,0,0);
   }
-  resize();window.addEventListener('resize',resize);
+  resize();window.addEventListener('resize',resize,{passive:true});
   class Particle{
     constructor(){this.reset()}
     reset(){
@@ -3027,8 +3065,14 @@ function closeMobileMenu(){
   const particleCount = window.innerWidth < 768 ? 40 : 120;
 for(let i=0;i<particleCount;i++)particles.push(new Particle());
   let mouseX=W/2,mouseY=H/2;
-  document.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY});
+  document.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY},{passive:true});
+  let running=true;
+  document.addEventListener('visibilitychange',()=>{
+    running=!document.hidden;
+    if(running)loop();
+  });
   function loop(){
+    if(!running)return;
     ctx.clearRect(0,0,W,H);
     // connections
     for(let i=0;i<particles.length;i++){
@@ -3718,14 +3762,21 @@ if('requestIdleCallback' in window){
 }
 /* ─── PRODUCTION DETAIL MODAL ─── */
 let lbProducts=[],lbIndex=0,lbImageIndex=0;
-function closeLightbox(){document.getElementById('lightbox').classList.remove('open');document.body.style.overflow=''}
+function closeLightbox(){
+  const lightbox=document.getElementById('lightbox');
+  lightbox?.classList.remove('open');
+  lightbox?.setAttribute('aria-hidden','true');
+  document.body.style.overflow='';
+}
 function openLightbox(index,imageIndex=0){
   if(!lbProducts.length)return;
   lbIndex=Math.max(0,Math.min(index,lbProducts.length-1));
   const mediaCount=productMediaList(lbProducts[lbIndex]||{}).length||1;
   lbImageIndex=Math.max(0,Math.min(Number(imageIndex)||0,mediaCount-1));
   updateLightbox();
-  document.getElementById('lightbox').classList.add('open');
+  const lightbox=document.getElementById('lightbox');
+  lightbox.classList.add('open');
+  lightbox.setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden';
 }
 function openProductFullView(index,imageIndex=0){

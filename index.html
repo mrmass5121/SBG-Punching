@@ -4449,15 +4449,10 @@ async function submitForm(){
     resetCaptcha('inquiry',document);
     openInquiryWhatsapp();
   }catch(error){
-    console.error('Inquiry submit failed:',error);
+    console.warn('Inquiry log failed, opening WhatsApp instead:',error);
     resetCaptcha('inquiry',document);
-    const errorText=String(error?.message||error||'');
-    if(errorText.includes('Please wait before submitting another inquiry')||errorText.includes('P0001')){
-      localStorage.setItem('sbg_last_inquiry',String(Date.now()));
-      openInquiryWhatsapp();
-      return;
-    }
-    alert(error.message||'Could not submit right now. Please call or WhatsApp us directly.');
+    localStorage.setItem('sbg_last_inquiry',String(Date.now()));
+    openInquiryWhatsapp();
   }finally{
     if(button){button.disabled=false;button.textContent='Send Enquiry via WhatsApp →'}
   }

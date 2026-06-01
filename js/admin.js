@@ -1018,7 +1018,8 @@ function renderServices() {
 
 function renderInquiries() {
   qs("#inquiryRows").innerHTML = inquiries.map(item => {
-    const isGalleryQuote = item.source === "gallery-quote-click" || item.source === "quote-click";
+    const isGalleryQuote = ["production-gallery", "gallery-quote-click", "quote-click"].includes(item.source);
+    const sourceLabel = isGalleryQuote ? "Production Gallery" : "Contact Section";
     const contactMeta = [
       item.company_name,
       isGalleryQuote ? "Phone not collected" : item.phone,
@@ -1037,6 +1038,7 @@ function renderInquiries() {
     <tr>
       <td>${previewCell}</td>
       <td><strong>${esc(item.contact_name)}</strong>${isGalleryQuote ? `<br><span class="status-pill queued">Product quote click</span>` : ""}${contactMeta ? `<br>${contactMeta}` : ""}</td>
+      <td>${esc(sourceLabel)}</td>
       <td>${esc(item.service)}</td>
       <td>${esc(item.message)}</td>
       <td>${formatDate(item.created_at || item.updated_at)}</td>
@@ -1049,7 +1051,7 @@ function renderInquiries() {
       </td>
     </tr>
   `;
-  }).join("") || `<tr><td colspan="7">No inquiries yet.</td></tr>`;
+  }).join("") || `<tr><td colspan="8">No inquiries yet.</td></tr>`;
   qsa("[data-inquiry]").forEach(btn => btn.addEventListener("click", () => markInquiry(btn.dataset.inquiry)));
   qsa("[data-delete-inquiry]").forEach(btn => btn.addEventListener("click", () => deleteInquiry(btn.dataset.deleteInquiry)));
   bindPreviewButtons();

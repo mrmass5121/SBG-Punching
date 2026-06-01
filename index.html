@@ -4434,14 +4434,14 @@ async function submitForm(){
     resetCaptcha('inquiry',document);
 
     const waMsg=encodeURIComponent(
-      `*New Enquiry - SBG Website*\n\n`+
-      `*Name:* ${name}\n`+
-      `*Company:* ${company||'N/A'}\n`+
-      `*Phone:* ${phone}\n`+
-      `*Email:* ${email||'N/A'}\n`+
-      `*Service:* ${service}\n`+
-      `*Material:* ${material||'N/A'}\n`+
-      `*Message:* ${message}`
+      `New Enquiry - SBG Website\n\n`+
+      `Name: ${name}\n`+
+      `Company: ${company||'N/A'}\n`+
+      `Phone: ${phone}\n`+
+      `Email: ${email||'N/A'}\n`+
+      `Service: ${service}\n`+
+      `Material: ${material||'N/A'}\n`+
+      `Message: ${message}`
     );
     window.open(`https://wa.me/${SBG_CFG.whatsappNumber||'918892181792'}?text=${waMsg}`,'_blank','noopener');
     document.getElementById('formBody').style.display='none';

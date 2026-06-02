@@ -42,13 +42,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindForms();
   bindLightbox();
   bindWhatsapp();
+  registerServiceWorker();
   qs("#productionSearch")?.addEventListener("input", event => {
     searchTerm = event.target.value.trim().toLowerCase();
     renderCards();
   });
   await loadProductions();
   registerRealtime();
-  registerServiceWorker();
 });
 
 function bindNavigation() {
@@ -164,7 +164,7 @@ function renderCards() {
   }
   lightboxItems = items.flatMap(item => (item.media || []).map(media => ({ ...media, title: item.title, category: item.category })));
   gallery.innerHTML = items.map((item, index) => productionCard(item, index)).join("");
-  qsa("[data-preview]").forEach(button => button.addEventListener("click", () => openLightbox(Number(button.dataset.preview))));
+  qsa("[data-preview]", gallery).forEach(button => button.addEventListener("click", () => openLightbox(Number(button.dataset.preview))));
   window.lucide?.createIcons();
 }
 
@@ -175,7 +175,7 @@ function productionCard(item, index) {
     ? `<div class="empty-media"><i data-lucide="image"></i></div>`
     : media.type === "video"
     ? `<video src="${esc(src)}" muted playsinline preload="metadata"></video>`
-    : `<img src="${esc(src)}" alt="${esc(media.alt || item.title)}" loading="lazy">`;
+    : `<img src="${esc(src)}" alt="${esc(media.alt || item.title)}" loading="lazy" decoding="async">`;
   const lightboxOffset = lightboxItems.findIndex(entry => entry.title === item.title);
   return `
     <article class="production-card reveal is-visible">
@@ -289,7 +289,7 @@ function renderLightbox() {
   }
   qs("#lightboxBody").innerHTML = item.type === "video"
     ? `<video src="${esc(src)}" controls autoplay playsinline></video><figcaption>${esc(item.title || "")}</figcaption>`
-    : `<img src="${esc(src)}" alt="${esc(item.alt || item.title || "Production preview")}"><figcaption>${esc(item.title || "")}</figcaption>`;
+    : `<img src="${esc(src)}" alt="${esc(item.alt || item.title || "Production preview")}" decoding="async"><figcaption>${esc(item.title || "")}</figcaption>`;
 }
 
 function registerServiceWorker() {

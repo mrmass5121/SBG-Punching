@@ -925,6 +925,110 @@ nav{display:flex;align-items:center;gap:4px}
   background: var(--green);
   color: #001007;
 }
+.production-shop-toolbar {
+  margin: 0 0 18px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(145deg,rgba(19,26,34,.98),rgba(11,15,20,.98));
+  box-shadow: 0 16px 42px rgba(0,0,0,.24);
+}
+.production-search-row {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+.production-search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1.5px solid rgba(0,200,83,.42);
+  border-radius: 10px;
+  background: rgba(255,255,255,.96);
+  color: #111827;
+}
+.production-search-box span {
+  color: #4b5563;
+  font-size: 1rem;
+}
+.production-search-box input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111827;
+  font: 600 .95rem var(--ff-body);
+}
+.production-search-box input::placeholder { color: #667085; }
+.production-filter-toggle,
+.production-clear-filters {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid var(--border-green);
+  border-radius: 10px;
+  background: rgba(0,200,83,.12);
+  color: var(--green);
+  font-size: .84rem;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.production-filter-toggle[aria-expanded="true"],
+.production-filter-toggle:hover,
+.production-clear-filters:hover {
+  background: var(--green);
+  color: #001007;
+}
+.production-results-line {
+  margin-top: 10px;
+  color: var(--steel);
+  font-size: .82rem;
+  font-weight: 700;
+}
+.production-filter-panel {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr) auto;
+  gap: 14px;
+  align-items: start;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.production-filter-panel[hidden] { display: none; }
+.production-filter-group strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: .82rem;
+}
+.production-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.production-chip {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255,255,255,.04);
+  color: var(--text2);
+  font-size: .76rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.production-chip.active,
+.production-chip:hover {
+  border-color: var(--green);
+  background: rgba(0,200,83,.16);
+  color: var(--green);
+}
 .wishlist-shelf {
   margin-bottom: 18px;
   padding: 16px;
@@ -2022,8 +2126,13 @@ footer{
   .amazon-gallery-shell{grid-template-columns:1fr}
   .amazon-filter-panel{border-right:0;border-bottom:1px solid #e5e7eb}
   .amazon-recommended-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .production-filter-panel{grid-template-columns:1fr}
 }
 @media(max-width:600px){
+  .production-search-row{grid-template-columns:1fr}
+  .production-filter-toggle,
+  .production-clear-filters{width:100%}
+  .production-shop-toolbar{padding:12px}
   .production-card-grid{
     grid-template-columns:repeat(2,1fr);
     gap:10px;
@@ -2702,6 +2811,27 @@ footer{
       <button class="production-tab" type="button" data-gallery-view="wishlist" role="tab" aria-selected="false">Wishlist <span data-wishlist-count></span></button>
     </div>
     <div id="productionGalleryShell">
+      <div class="production-shop-toolbar" aria-label="Production search and filters">
+        <div class="production-search-row">
+          <label class="production-search-box" for="productionSearchInput">
+            <span aria-hidden="true">&#128269;</span>
+            <input id="productionSearchInput" type="search" placeholder="Search for productions, materials and more" autocomplete="off">
+          </label>
+          <button id="productionFilterToggle" class="production-filter-toggle" type="button" aria-expanded="false" aria-controls="productionFilterPanel">Filters</button>
+        </div>
+        <div id="productionResultsLine" class="production-results-line">Showing productions</div>
+        <div id="productionFilterPanel" class="production-filter-panel" hidden>
+          <div class="production-filter-group">
+            <strong>Category</strong>
+            <div id="productionCategoryFilters" class="production-chip-row"></div>
+          </div>
+          <div class="production-filter-group">
+            <strong>Material</strong>
+            <div id="productionMaterialFilters" class="production-chip-row"></div>
+          </div>
+          <button id="productionClearFilters" class="production-clear-filters" type="button">Clear Filters</button>
+        </div>
+      </div>
       <div id="wishlistShelf" class="wishlist-shelf" hidden></div>
       <div id="recommendedGallery" class="production-card-grid"></div>
       <!-- LOAD MORE BUTTON -->
@@ -3048,6 +3178,8 @@ const FALLBACK_PRODUCTS=[];
 const REMOVED_PRODUCTION_IDS=new Set(['5e39e40b-c668-466f-8e04-33de2a9f3cad']);
 let products=FALLBACK_PRODUCTS;
 let currentFilter='All';
+let currentMaterialFilter='All';
+let productSearchQuery='';
 let activeGalleryView='collections';
 let sbgClient=null;
 let visibleProducts=[];
@@ -3507,6 +3639,80 @@ function fullViewIcon(){
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M21 3l-7 7"></path><path d="M9 21H3v-6"></path><path d="M3 21l7-7"></path></svg>`;
 }
 
+function productSearchText(product){
+  const values=[
+    product?.name,
+    product?.cat,
+    product?.category,
+    product?.mat,
+    product?.material,
+    product?.thickness,
+    product?.status,
+    product?.desc,
+    ...(Array.isArray(product?.tags)?product.tags:[]),
+    ...(Array.isArray(product?.features)?product.features:[])
+  ];
+  return values.filter(Boolean).join(' ').toLowerCase();
+}
+function productMaterialLabel(product){
+  const direct=String(product?.material||'').trim();
+  if(direct)return direct;
+  const fromDetails=String(product?.mat||'').split('/')[0].trim();
+  return fromDetails&&!/^qty\b/i.test(fromDetails)?fromDetails:'Other';
+}
+function uniqueProductValues(items,mapper,limit=12){
+  return [...new Set(items.map(mapper).map(value=>String(value||'').trim()).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b))
+    .slice(0,limit);
+}
+function productMatchesSearch(product){
+  const query=productSearchQuery.trim().toLowerCase();
+  return !query||productSearchText(product).includes(query);
+}
+function productMatchesMaterial(product){
+  return currentMaterialFilter==='All'||productMaterialLabel(product)===currentMaterialFilter;
+}
+function filterProductionList(items){
+  return items.filter(product=>
+    (currentFilter==='All'||product.cat===currentFilter) &&
+    productMatchesMaterial(product) &&
+    productMatchesSearch(product)
+  );
+}
+function renderProductionChips(container,values,activeValue,dataName){
+  if(!container)return;
+  container.innerHTML=['All',...values].map(value=>{
+    const active=value===activeValue;
+    return `<button class="production-chip ${active?'active':''}" type="button" data-${dataName}="${escHTML(value)}" aria-pressed="${active?'true':'false'}">${escHTML(value)}</button>`;
+  }).join('');
+}
+function syncProductionControls(source,filtered){
+  const search=document.getElementById('productionSearchInput');
+  if(search&&search.value!==productSearchQuery)search.value=productSearchQuery;
+  const categories=uniqueProductValues(source,product=>product.cat||'Production');
+  const materials=uniqueProductValues(source,productMaterialLabel);
+  renderProductionChips(document.getElementById('productionCategoryFilters'),categories,currentFilter,'production-category');
+  renderProductionChips(document.getElementById('productionMaterialFilters'),materials,currentMaterialFilter,'production-material');
+  const line=document.getElementById('productionResultsLine');
+  if(line){
+    const count=filtered.length;
+    const total=source.length;
+    const query=productSearchQuery.trim();
+    const parts=[
+      `Showing ${count} of ${total} production${total===1?'':'s'}`,
+      currentFilter!=='All'?`Category: ${currentFilter}`:'',
+      currentMaterialFilter!=='All'?`Material: ${currentMaterialFilter}`:'',
+      query?`Search: "${query}"`:''
+    ].filter(Boolean);
+    line.textContent=parts.join(' | ');
+  }
+}
+function clearProductionFilters(){
+  currentFilter='All';
+  currentMaterialFilter='All';
+  productSearchQuery='';
+  renderProducts(currentFilter);
+}
 function productGlobalIndex(product){
   return Math.max(0,products.findIndex(item=>item.name===product.name&&item.cat===product.cat));
 }
@@ -3643,18 +3849,27 @@ function renderProducts(filter){
     wishlist:wishlistCollectionProducts
   };
   const source=(sources[activeGalleryView]||collectionProducts)();
-  const filtered=filter==='All'?source:source.filter(p=>p.cat===filter);
+  const filtered=filterProductionList(source);
   visibleProducts=filtered;
   document.getElementById('productionDetailView')?.setAttribute('hidden','');
   galleryShell?.removeAttribute('hidden');
+  syncProductionControls(source,filtered);
   if(recommendedGrid&&activeGalleryView==='wishlist'){
     recommendedGrid.innerHTML='';
   }else if(recommendedGrid){
     recommendedGrid.innerHTML=filtered.length
       ? filtered.map(productRecommendedCard).join('')
-      : `<div class="empty-gallery-note">${activeGalleryView==='wishlist'?'No wishlist products yet. Save products to see them here.':activeGalleryView==='featured'?'No featured production records yet.':'No public gallery collections yet.'}</div>`;
+      : `<div class="empty-gallery-note">${
+          productSearchQuery||currentFilter!=='All'||currentMaterialFilter!=='All'
+            ? 'No productions match your search or filters.'
+            : activeGalleryView==='wishlist'
+              ? 'No wishlist products yet. Save products to see them here.'
+              : activeGalleryView==='featured'
+                ? 'No featured production records yet.'
+                : 'No public gallery collections yet.'
+        }</div>`;
   }
-  renderWishlistShelf(activeGalleryView==='wishlist');
+  renderWishlistShelf(activeGalleryView==='wishlist',filtered);
   updateGalleryTabs();
   lbProducts=filtered;
   bindProductCards(document.getElementById('production')||document);
@@ -3668,6 +3883,32 @@ function setFilter(f,btn){
 }
 document.querySelectorAll('[data-gallery-view]').forEach(button=>{
   button.addEventListener('click',()=>setGalleryView(button.dataset.galleryView));
+});
+document.getElementById('productionSearchInput')?.addEventListener('input',event=>{
+  productSearchQuery=event.currentTarget.value;
+  renderProducts(currentFilter);
+});
+document.getElementById('productionFilterToggle')?.addEventListener('click',event=>{
+  const button=event.currentTarget;
+  const panel=document.getElementById('productionFilterPanel');
+  if(!panel)return;
+  const open=panel.hasAttribute('hidden');
+  panel.toggleAttribute('hidden',!open);
+  button.setAttribute('aria-expanded',open?'true':'false');
+});
+document.getElementById('productionClearFilters')?.addEventListener('click',clearProductionFilters);
+document.getElementById('productionFilterPanel')?.addEventListener('click',event=>{
+  const category=event.target.closest('[data-production-category]');
+  if(category){
+    currentFilter=category.dataset.productionCategory||'All';
+    renderProducts(currentFilter);
+    return;
+  }
+  const material=event.target.closest('[data-production-material]');
+  if(material){
+    currentMaterialFilter=material.dataset.productionMaterial||'All';
+    renderProducts(currentFilter);
+  }
 });
 function startNonCriticalHomepageWork(){
   loadProducts();
@@ -3848,10 +4089,10 @@ function toggleWishlist(product){
   updateGalleryTabs();
   syncWishlistButtons();
 }
-function renderWishlistShelf(forceVisible=false){
+function renderWishlistShelf(forceVisible=false,filteredItems=null){
   const shelf=document.getElementById('wishlistShelf');
   if(!shelf)return;
-  const items=wishlistCollectionProducts();
+  const items=Array.isArray(filteredItems)?filteredItems:wishlistCollectionProducts();
   if(!forceVisible){
     shelf.setAttribute('hidden','');
     shelf.innerHTML='';
@@ -3878,7 +4119,7 @@ function renderWishlistShelf(forceVisible=false){
             <button class="product-card-action product-share-action" type="button" data-share-product="${index}">Share</button>
           </div>
         </article>`;
-      }).join(''):`<div class="empty-gallery-note">No wishlist products yet. Tap Wishlist on any product to save it here.</div>`}
+      }).join(''):`<div class="empty-gallery-note">${productSearchQuery||currentFilter!=='All'||currentMaterialFilter!=='All'?'No wishlist products match your search or filters.':'No wishlist products yet. Tap Wishlist on any product to save it here.'}</div>`}
     </div>`;
 }
 function productImage(product){

@@ -523,7 +523,7 @@ blockquote cite { display: block; margin-top: 18px; color: var(--green); font-st
   align-items: start;
 }
 .contact-list { display: grid; gap: 10px; margin-top: 28px; }
-.contact-list a, .contact-list span {
+.contact-list .contact-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -533,6 +533,15 @@ blockquote cite { display: block; margin-top: 18px; color: var(--green); font-st
   border-radius: var(--radius);
   color: var(--muted);
   background: rgba(18,27,37,.58);
+}
+.contact-list .contact-item > span {
+  display: inline;
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
 }
 .contact-list svg { color: var(--green); }
 .quote-form { display: grid; gap: 12px; padding: 20px; }

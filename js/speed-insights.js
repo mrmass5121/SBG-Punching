@@ -1,10 +1,16 @@
 /**
- * Vercel Speed Insights initialization
- * This script injects the Speed Insights tracking code to measure web vitals
+ * Vercel Speed Insights initialization for static HTML pages.
+ * Vercel serves this route only after Speed Insights is enabled for the project.
  */
-import { injectSpeedInsights } from './vercel-speed-insights.mjs';
+(function () {
+  if (window.__sbgSpeedInsightsLoaded) return;
+  window.__sbgSpeedInsightsLoaded = true;
+  window.si = window.si || function () {
+    (window.siq = window.siq || []).push(arguments);
+  };
 
-// Initialize Speed Insights
-injectSpeedInsights({
-  debug: false, // Set to true for development debugging
-});
+  var script = document.createElement("script");
+  script.defer = true;
+  script.src = "/_vercel/speed-insights/script.js";
+  document.head.appendChild(script);
+})();

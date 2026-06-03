@@ -10,9 +10,18 @@ const blockedPaths = [
   /^\/_redirects$/i,
   /^\/\.env\.example$/i
 ];
+const canonicalHost = "www.sbgpunching.in";
+const redirectHosts = new Set(["sbgpunching.in"]);
 
 export async function onRequest(context) {
-  const path = new URL(context.request.url).pathname;
+  const url = new URL(context.request.url);
+  if (redirectHosts.has(url.hostname.toLowerCase())) {
+    url.protocol = "https:";
+    url.hostname = canonicalHost;
+    return Response.redirect(url.toString(), 301);
+  }
+
+  const path = url.pathname;
   if (blockedPaths.some(pattern => pattern.test(path))) {
     return new Response("Not found", {
       status: 404,

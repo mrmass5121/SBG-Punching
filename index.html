@@ -880,11 +880,18 @@ nav{display:flex;align-items:center;gap:4px}
   background: var(--green2);
   color: #001007;
 }
+.production-gallery-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  flex-wrap: wrap;
+}
 .production-tabs {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin: 0 0 22px;
   flex-wrap: wrap;
 }
 .production-tab {
@@ -925,52 +932,59 @@ nav{display:flex;align-items:center;gap:4px}
   color: #001007;
 }
 .production-shop-toolbar {
-  margin: 0 0 18px;
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: linear-gradient(145deg,rgba(19,26,34,.98),rgba(11,15,20,.98));
-  box-shadow: 0 16px 42px rgba(0,0,0,.24);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .production-search-row {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) auto;
+  display: flex;
   gap: 10px;
   align-items: center;
 }
 .production-search-box {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 48px;
+  gap: 8px;
+  width: 170px;
+  min-height: 42px;
   padding: 0 14px;
-  border: 1.5px solid rgba(0,200,83,.42);
-  border-radius: 10px;
-  background: rgba(255,255,255,.96);
-  color: #111827;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text2);
+  transition: border-color .2s, background .2s, width .2s;
+}
+.production-search-box:focus-within {
+  width: 230px;
+  border-color: var(--green);
+  background: rgba(0,200,83,.1);
 }
 .production-search-box span {
-  color: #4b5563;
+  color: var(--green);
   font-size: 1rem;
 }
 .production-search-box input {
   width: 100%;
+  min-width: 0;
   border: 0;
   outline: 0;
   background: transparent;
-  color: #111827;
-  font: 600 .95rem var(--ff-body);
+  color: var(--text);
+  font: 800 .84rem var(--ff-body);
 }
-.production-search-box input::placeholder { color: #667085; }
+.production-search-box input::placeholder { color: var(--text2); }
 .production-filter-toggle,
 .production-clear-filters {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  padding: 0 18px;
+  min-height: 42px;
+  padding: 0 16px;
   border: 1px solid var(--border-green);
-  border-radius: 10px;
+  border-radius: 999px;
   background: rgba(0,200,83,.12);
   color: var(--green);
   font-size: .84rem;
@@ -985,7 +999,7 @@ nav{display:flex;align-items:center;gap:4px}
   color: #001007;
 }
 .production-results-line {
-  margin-top: 10px;
+  margin: 0 0 14px;
   color: var(--steel);
   font-size: .82rem;
   font-weight: 700;
@@ -995,9 +1009,12 @@ nav{display:flex;align-items:center;gap:4px}
   grid-template-columns: minmax(0,1fr) minmax(0,1fr) auto;
   gap: 14px;
   align-items: start;
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(145deg,rgba(19,26,34,.98),rgba(11,15,20,.98));
+  box-shadow: 0 16px 42px rgba(0,0,0,.24);
 }
 .production-filter-panel[hidden] { display: none; }
 .production-filter-group strong {
@@ -1959,12 +1976,23 @@ footer{
   .shop-action-row{grid-template-columns:repeat(2,minmax(0,1fr))}
   .shop-related-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .production-filter-panel{grid-template-columns:1fr}
+  .production-gallery-controls{justify-content:flex-start}
 }
 @media(max-width:600px){
-  .production-search-row{grid-template-columns:1fr}
+  .production-gallery-controls,
+  .production-tabs,
+  .production-shop-toolbar,
+  .production-search-row{width:100%}
+  .production-tabs{justify-content:flex-start}
+  .production-search-row{align-items:stretch}
+  .production-search-box,
+  .production-search-box:focus-within{
+    flex:1 1 auto;
+    width:auto;
+    min-width:0;
+  }
   .production-filter-toggle,
-  .production-clear-filters{width:100%}
-  .production-shop-toolbar{padding:12px}
+  .production-clear-filters{width:auto}
   .production-card-grid{
     grid-template-columns:repeat(2,1fr);
     gap:10px;
@@ -2632,21 +2660,24 @@ footer{
       <h2 class="section-title"> PRODUCTION <span>GALLERY</span></h2>
     </div>
 
-    <div class="production-tabs" role="tablist" aria-label="Production gallery views">
-      <button class="production-tab active" type="button" data-gallery-view="collections" role="tab" aria-selected="true">Collections <span data-collections-count></span></button>
-      <button class="production-tab" type="button" data-gallery-view="customised" role="tab" aria-selected="false">Customised Designs <span data-customised-count></span></button>
-      <button class="production-tab" type="button" data-gallery-view="featured" role="tab" aria-selected="false">Featured Collection <span data-featured-count></span></button>
-      <button class="production-tab" type="button" data-gallery-view="wishlist" role="tab" aria-selected="false">Wishlist <span data-wishlist-count></span></button>
-    </div>
-    <div id="productionGalleryShell">
+    <div class="production-gallery-controls">
+      <div class="production-tabs" role="tablist" aria-label="Production gallery views">
+        <button class="production-tab active" type="button" data-gallery-view="collections" role="tab" aria-selected="true">Collections <span data-collections-count></span></button>
+        <button class="production-tab" type="button" data-gallery-view="customised" role="tab" aria-selected="false">Customised Designs <span data-customised-count></span></button>
+        <button class="production-tab" type="button" data-gallery-view="featured" role="tab" aria-selected="false">Featured Collection <span data-featured-count></span></button>
+        <button class="production-tab" type="button" data-gallery-view="wishlist" role="tab" aria-selected="false">Wishlist <span data-wishlist-count></span></button>
+      </div>
       <div class="production-shop-toolbar" aria-label="Production search and filters">
         <div class="production-search-row">
           <label class="production-search-box" for="productionSearchInput">
             <span aria-hidden="true">&#128269;</span>
-            <input id="productionSearchInput" type="search" placeholder="Search for productions, materials and more" autocomplete="off">
+            <input id="productionSearchInput" type="search" placeholder="Search" autocomplete="off">
           </label>
           <button id="productionFilterToggle" class="production-filter-toggle" type="button" aria-expanded="false" aria-controls="productionFilterPanel">Filters</button>
         </div>
+      </div>
+    </div>
+    <div id="productionGalleryShell">
         <div id="productionResultsLine" class="production-results-line">Showing productions</div>
         <div id="productionFilterPanel" class="production-filter-panel" hidden>
           <div class="production-filter-group">
@@ -2659,7 +2690,6 @@ footer{
           </div>
           <button id="productionClearFilters" class="production-clear-filters" type="button">Clear Filters</button>
         </div>
-      </div>
       <div id="wishlistShelf" class="wishlist-shelf" hidden></div>
       <div id="recommendedGallery" class="production-card-grid"></div>
       <!-- LOAD MORE BUTTON -->

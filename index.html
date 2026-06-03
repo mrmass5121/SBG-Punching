@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="S.B.G. Punching CNC Punching, Laser Cutting, Sheet Metal Fabrication & Control Panels in Bangalore. MS, SS, Aluminium. Contact us for a free quote.">
+<meta name="description" content="S.B.G. Punching ? CNC Punching, Laser Cutting, Sheet Metal Fabrication & Control Panels in Bangalore. MS, SS, Aluminium. Contact us for a free quote.">
 <meta name="keywords" content="CNC Turret Punch Job Works, CNC Laser Cutting Services, CNC Sheet Metal Cutting Services, Laser Metal Cutting Services, Sheet Metal Fabricators, Sheet Fabrication Services, Precision Sheet Metal Fabricators, Metal Fabricators, Industrial Fabricators, Engineering Job Works, Engineering Workshops, Control Panel Board Manufacturers, Panel Board Fabricators, MS Sheet Cutting Services, MS Laser Cutting Services, Stainless Steel Laser Cutting Services, Aluminium Laser Cutting Services, Brass Cutting Services, Copper Laser Cutting Services, Copper Cutting Services, Metal Cutting Job Works, Metal Sheet Bending Job Works, Sheet Bending Job Works, Plate Bending Job Works, Angle Bending Job Works, Metal Bending Job Works, Steel Sheet Metal Fabrication Services, Steel Cutting Services, Metal Product Manufacturers, Industrial Rack Dealers, Storage Rack Manufacturers, S.B.G. Punching Bangalore">
 <meta name="author" content="S.B.G. Punching">
 <meta name="robots" content="index, follow">
 <meta name="google-site-verification" content="R2_bxzQXUrJFbZI2WP2dWD_d4u_oD4l_NDiDkVoGnIg" />
 <meta name="theme-color" content="#0b0f14">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta property="og:title" content="S.B.G. PUNCHING Precision Metal Works, Bangalore">
+<meta property="og:title" content="S.B.G. PUNCHING ? Precision Metal Works, Bangalore">
 <meta property="og:description" content="CNC Punching, Laser Cutting, Sheet Metal Fabrication & Control Panels in Bangalore. 15+ years. 50K+ projects.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.sbgpunching.in">
 <meta property="og:image" content="https://www.sbgpunching.in/img/og-image.jpg">
 <meta property="og:image:alt" content="S.B.G. Punching production gallery">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="S.B.G. PUNCHING Precision Metal Works, Bangalore">
+<meta name="twitter:title" content="S.B.G. PUNCHING ? Precision Metal Works, Bangalore">
 <meta name="twitter:description" content="CNC Punching, Laser Cutting, Sheet Metal Fabrication & Control Panels in Bangalore.">
 <meta name="twitter:image" content="https://www.sbgpunching.in/img/og-image.jpg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"S.B.G. Punching","description":"CNC Punching, Laser Cutting, Sheet Metal Fabrication and Control Panels in Bangalore","telephone":"+918892181792","email":"sbgpunching@gmail.com","address":{"@type":"PostalAddress","streetAddress":"#61/16, Katha No. 501/1093, Nadakerappa Industrial Estate, Hegganahalli","addressLocality":"Bangalore","postalCode":"560091","addressCountry":"IN"},"openingHours":"Mo-Sa 09:00-18:00","priceRange":"??"}</script>
-<title>S.B.G. PUNCHING CNC Punching & Sheet Metal Fabrication, Bangalore</title>
+<title>S.B.G. PUNCHING ? CNC Punching & Sheet Metal Fabrication, Bangalore</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%230b0f14'/%3E%3Cpath d='M16 44h32v8H16zM22 12h20v8H22zM18 22h28l4 20H14z' fill='%2300c853'/%3E%3Cpath d='M24 28h20M22 36h24' stroke='%23fff' stroke-width='4'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='28' fill='%230b0f14'/%3E%3Cpath d='M44 124h92v22H44zM62 34h56v22H62zM50 64h78l12 56H38z' fill='%2300c853'/%3E%3Cpath d='M66 82h58M60 104h70' stroke='%23fff' stroke-width='10'/%3E%3C/svg%3E">
 <link rel="canonical" href="https://www.sbgpunching.in/">
@@ -3491,7 +3491,7 @@ function reviewStats(product){
 }
 function starText(value){
   const rating=Math.round(Number(value)||0);
-  return Array.from({length:5},(_,index)=>index<rating?'★':'☆').join('');
+  return Array.from({length:5},(_,index)=>index<rating?'&#9733;':'&#9734;').join('');
 }
 function fullViewIcon(){
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M21 3l-7 7"></path><path d="M9 21H3v-6"></path><path d="M3 21l7-7"></path></svg>`;
@@ -3580,7 +3580,7 @@ function productRecommendedCard(product,index){
   const name=escHTML(product.name||'Production Item');
   const mat=escHTML(product.mat||product.material||'Custom material');
   const stats=reviewStats(product);
-  const ratingLabel=stats.count?`${starText(stats.average)} ${stats.average.toFixed(1)} (${stats.count})`:'????? No ratings';
+  const ratingLabel=stats.count?`${starText(stats.average)} ${stats.average.toFixed(1)} (${stats.count})`:'&#9734;&#9734;&#9734;&#9734;&#9734; No ratings';
   const slug=productSlug(product);
   const saved=isWishlisted(product);
   return `<article class="amazon-product-card amazon-rec-card" data-product-index="${productIndex}" role="button" tabindex="0" aria-label="View ${name}">
@@ -4001,7 +4001,7 @@ function closeProductionDetailViewOnly(){
   currentProductIndex=-1;
   activeImageIndex=0;
   activeProductTab='description';
-  document.title='S.B.G. PUNCHING CNC Punching, Laser Cutting & Sheet Metal Fabrication';
+  document.title='S.B.G. PUNCHING ? CNC Punching, Laser Cutting & Sheet Metal Fabrication';
   updateGalleryTabs();
 }
 function shopRelatedCard(product){
@@ -4141,7 +4141,7 @@ function renderReviewPanel(product){
   const average=stats.count?stats.average.toFixed(1):'No ratings yet';
   const summary=stats.count
     ? `<span class="review-stars">${starText(stats.average)}</span><strong>${average}</strong><span>${stats.count} review${stats.count===1?'':'s'}</span>`
-    : `<span class="review-stars">☆☆☆☆☆</span><strong>No reviews yet</strong><span>Be the first customer to review this production.</span>`;
+    : `<span class="review-stars">&#9734;&#9734;&#9734;&#9734;&#9734;</span><strong>No reviews yet</strong><span>Be the first customer to review this production.</span>`;
   const list=reviews.slice(0,8).map(review=>`
     <article class="review-item">
       <div><strong>${escHTML(review.reviewer_name||'Customer')}</strong> <span class="review-stars">${starText(review.rating)}</span></div>
@@ -4153,7 +4153,7 @@ function renderReviewPanel(product){
     <form class="review-form" data-review-form>
       <input name="reviewer_name" maxlength="80" required placeholder="Your name">
       <div class="review-rating-picker" aria-label="Rating">
-        ${[1,2,3,4,5].map(value=>`<button class="${value<=pendingReviewRating?'active':''}" type="button" data-review-rating="${value}" aria-label="${value} star">${value<=pendingReviewRating?'?':'?'}</button>`).join('')}
+        ${[1,2,3,4,5].map(value=>`<button class="${value<=pendingReviewRating?'active':''}" type="button" data-review-rating="${value}" aria-label="${value} star">${value<=pendingReviewRating?'&#9733;':'&#9734;'}</button>`).join('')}
       </div>
       <textarea name="comment" maxlength="700" required placeholder="Write your review"></textarea>
       <div class="captcha-field" data-turnstile="review"></div>
@@ -4351,7 +4351,7 @@ function renderOpenProductDetail(shouldScroll=true){
         </div>
         <div class="shop-info-pane">
           <h3 itemprop="name">${escHTML(product.name||'Production Item')}</h3>
-          <span class="shop-rating">${reviewStats(product).count?`${reviewStats(product).average.toFixed(1)} ?`:'No ratings'}</span><span class="shop-status">${escHTML(product.status||'Available')}</span>
+          <span class="shop-rating">${reviewStats(product).count?`${reviewStats(product).average.toFixed(1)} &#9733;`:'No ratings'}</span><span class="shop-status">${escHTML(product.status||'Available')}</span>
           <p class="shop-description">${escHTML(product.desc||'Production details are available on request. Share your drawing, size, material, thickness, and quantity so S.B.G. Punching can confirm the right process and delivery timeline.')}</p>
           <div class="shop-action-row">
             <a class="shop-quote-btn" href="${productEnquiryUrl(product)}" target="_blank" rel="noopener noreferrer">Request Quote</a>

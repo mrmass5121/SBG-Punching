@@ -3,7 +3,7 @@ const path = require("path");
 
 const DEFAULT_TITLE = "S.B.G. PUNCHING — Precision Metal Works, Bangalore";
 const DEFAULT_DESC = "CNC Punching, Laser Cutting, Sheet Metal Fabrication & Control Panels in Bangalore. 15+ years. 50K+ projects.";
-const PRODUCTION_ORIGIN = "https://sbgpunching.vercel.app";
+const PRODUCTION_ORIGIN = "https://www.sbgpunching.in";
 const DEFAULT_IMAGE = `${PRODUCTION_ORIGIN}/img/og-image.jpg`;
 
 function esc(value) {
@@ -108,7 +108,10 @@ function requestOrigin(request) {
   const headers = request.headers || {};
   const host = headers["x-forwarded-host"] || headers.host;
   const proto = headers["x-forwarded-proto"] || "https";
-  return host ? `${proto}://${host}` : PRODUCTION_ORIGIN;
+  if (host && /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(String(host))) {
+    return `${proto}://${host}`;
+  }
+  return PRODUCTION_ORIGIN;
 }
 
 function readIndexHtml() {

@@ -131,6 +131,7 @@ module.exports = async function handler(request, response) {
     await insertReview(payload);
     return send(response, 200, { ok: true, message: "Review submitted for approval." });
   } catch (error) {
-    return send(response, 500, { error: error.message || "Could not submit review." });
+    console.error(error);
+    return send(response, 500, { error: "Could not submit review. Please try again later." });
   }
 };

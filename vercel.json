@@ -10,7 +10,7 @@
   },
   "headers": [
     {
-      "source": "/css/(.*)",
+      "source": "/css/:path*",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
@@ -22,31 +22,13 @@
       ]
     },
     {
-      "source": "/js/((?!(config|speed-insights)\\.js).*)",
+      "source": "/assets/:path*",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {
-      "source": "/assets/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/(.*\\.webp)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/(.*\\.woff2)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/(.*)",
+      "source": "/:path*",
       "headers": [
         {
           "key": "X-Frame-Options",
@@ -75,7 +57,7 @@
       ]
     },
     {
-      "source": "/admin/(.*)",
+      "source": "/admin/:path*",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -101,7 +83,7 @@
       ]
     },
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -112,25 +94,25 @@
   ],
   "redirects": [
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [
         {
           "type": "host",
           "value": "sbgpunching.vercel.app"
         }
       ],
-      "destination": "https://www.sbgpunching.in/$1",
+      "destination": "https://www.sbgpunching.in/:path*",
       "permanent": true
     },
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [
         {
           "type": "host",
           "value": "sbgpunching.in"
         }
       ],
-      "destination": "https://www.sbgpunching.in/$1",
+      "destination": "https://www.sbgpunching.in/:path*",
       "permanent": true
     },
     {

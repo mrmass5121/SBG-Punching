@@ -97,7 +97,8 @@ export async function onRequestPost(context) {
     await insertInquiry(context.env, payload);
     return json(200, { ok: true, message: "Inquiry submitted." });
   } catch (error) {
-    return json(500, { error: error.message || "Could not submit inquiry." });
+    console.error(error);
+    return json(500, { error: "Could not submit inquiry. Please try WhatsApp or call us directly." });
   }
 }
 

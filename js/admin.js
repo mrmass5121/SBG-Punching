@@ -7,6 +7,7 @@ const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gi
 const maxBytes = (Number(cfg.maxUploadMb) || 20) * 1024 * 1024;
 const publicBucket = cfg.publicStorageBucket || cfg.storageBucket || "production-media-public";
 const privateBucket = cfg.privateStorageBucket || "production-media-private";
+const canonicalOrigin = "https://www.sbgpunching.in";
 
 let currentUser = null;
 let productions = [];
@@ -1145,7 +1146,8 @@ function productLiveUrl(slug) {
   const adminIndex = path.toLowerCase().indexOf("/admin/");
   const base = adminIndex >= 0 ? path.slice(0, adminIndex) : path.replace(/\/(?:admin\/?)?$/i, "");
   const cleanBase = (base || "").replace(/\/$/, "");
-  return `${location.origin}${cleanBase}/products/${encodeURIComponent(value)}`;
+  const origin = /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(location.host) ? location.origin : canonicalOrigin;
+  return `${origin}${cleanBase}/products/${encodeURIComponent(value)}`;
 }
 
 function reviewProductLink(review, product) {

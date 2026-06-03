@@ -126,6 +126,7 @@ module.exports = async function handler(request, response) {
     await insertInquiry(payload);
     return send(response, 200, { ok: true, message: "Inquiry submitted." });
   } catch (error) {
-    return send(response, 500, { error: error.message || "Could not submit inquiry." });
+    console.error(error);
+    return send(response, 500, { error: "Could not submit inquiry. Please try WhatsApp or call us directly." });
   }
 };

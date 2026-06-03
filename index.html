@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -90,7 +90,7 @@ textarea:focus-visible{
 
 
 
-/* intro splash removed ? permanently hidden by Lighthouse patch */
+/* intro splash removed — permanently hidden by Lighthouse patch */
 
 /* ═══════════════════════════════════════
    MOBILE MENU
@@ -1901,7 +1901,7 @@ footer{
   font-size:.88rem;color:var(--text2);transition:all .2s;
   display:flex;align-items:center;gap:8px;
 }
-.footer-links a::before{content:'?';color:var(--green);opacity:0;transition:opacity .2s}
+.footer-links a::before{content:'›';color:var(--green);opacity:0;transition:opacity .2s}
 .footer-links a:hover{color:var(--green);padding-left:4px}
 .footer-links a:hover::before{opacity:1}
 .footer-contact-item{
@@ -2154,6 +2154,19 @@ footer{
 </style>
 </head>
 <body>
+<noscript>
+  <div style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0b0f14;color:#e8edf2;font-family:sans-serif;text-align:center;padding:24px">
+    <svg width="48" height="48" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#131a22"/><path d="M16 44h32v8H16zM22 12h20v8H22zM18 22h28l4 20H14z" fill="#00c853"/></svg>
+    <h1 style="font-size:1.6rem;margin:0">S.B.G. Punching</h1>
+    <p style="color:#b0bec5;max-width:380px;line-height:1.6;margin:0">This site requires JavaScript to display fully. Please enable it, or reach us directly:</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+      <a href="tel:+918892181792" style="color:#00c853;font-size:1.1rem">📞 +91 88921 81792</a>
+      <a href="mailto:sbgpunching@gmail.com" style="color:#00c853">✉️ sbgpunching@gmail.com</a>
+      <a href="https://wa.me/918892181792" style="color:#25D366">💬 WhatsApp Us</a>
+      <span style="color:#8b949e;font-size:.85rem">🔍 Hegganahalli, Bangalore – 560091 &nbsp;|&nbsp; Mon–Sat 9am–6pm</span>
+    </div>
+  </div>
+</noscript>
 <a class="skip-link" href="#mainContent">Skip to content</a>
 
 <!-- intro splash removed (permanently hidden) -->
@@ -2163,7 +2176,7 @@ footer{
 <div id="mobileMenu" role="dialog" aria-modal="true" aria-labelledby="mobileMenuTitle" hidden>
   <div class="mob-header">
     <div class="mob-brand" id="mobileMenuTitle">SBG</div>
-    <button class="mob-close" type="button" onclick="closeMobileMenu()" aria-label="Close menu">?</button>
+    <button class="mob-close" type="button" onclick="closeMobileMenu()" aria-label="Close menu">✕</button>
   </div>
   <div class="mob-links">
     <a href="#" onclick="closeMobileMenu()">Home</a>
@@ -2299,7 +2312,7 @@ footer{
       <div class="about-details">
         <div class="about-detail"><strong>PARTNER</strong><span>Ravi Kumar S.</span></div>
         <div class="about-detail"><strong>GSTIN</strong><span>29AEEFS7551L1ZD</span></div>
-        <div class="about-detail"><strong>ADDRESS</strong><span>#61/16, Katha 501/1093, Nadakerappa Industrial Estate, Hegganahalli, Bangalore ? 560091</span></div>
+        <div class="about-detail"><strong>ADDRESS</strong><span>#61/16, Katha 501/1093, Nadakerappa Industrial Estate, Hegganahalli, Bangalore – 560091</span></div>
         <div class="about-detail"><strong>WORKING DAYS</strong><span>Monday – Saturday</span></div>
       </div>
     </div>
@@ -2374,7 +2387,7 @@ footer{
           </svg>
         </div>
         <div class="svc-name">SHEET BENDING</div>
-        <p class="svc-desc">CNC press brake bending up to 10mm. Profiles, channels, boxes ? any angle, any material. Repeatability ensured across large production runs.</p>
+        <p class="svc-desc">CNC press brake bending up to 10mm. Profiles, channels, boxes — any angle, any material. Repeatability ensured across large production runs.</p>
         <span class="svc-tag">UP TO 10mm · MAX 3000mm</span>
         <span class="svc-more">Bending details →</span>
       </a>
@@ -2387,7 +2400,7 @@ footer{
           </svg>
         </div>
         <div class="svc-name">FABRICATION WORKS</div>
-        <p class="svc-desc">Complete sheet metal fabrication ? cutting, bending, welding, assembly ? for enclosures, frames, panels and structural components.</p>
+        <p class="svc-desc">Complete sheet metal fabrication — cutting, bending, welding, assembly — for enclosures, frames, panels and structural components.</p>
         <span class="svc-tag">PROTOTYPE TO PRODUCTION</span>
         <span class="svc-more">Fabrication details →</span>
       </a>
@@ -2413,7 +2426,7 @@ footer{
           </svg>
         </div>
         <div class="svc-name">JOB WORKS</div>
-        <p class="svc-desc">Flexible job work for OEMs and contract manufacturers. Single-piece prototypes or bulk runs ? same precision, competitive pricing, fast turnaround.</p>
+        <p class="svc-desc">Flexible job work for OEMs and contract manufacturers. Single-piece prototypes or bulk runs — same precision, competitive pricing, fast turnaround.</p>
         <span class="svc-tag">SINGLE PIECE TO BULK</span>
         <span class="svc-more">MS sheet cutting details →</span>
       </a>
@@ -2503,7 +2516,7 @@ footer{
         <div class="step-num">01</div>
         <div class="step-icon">📋</div>
         <div class="step-title">Share Your Requirement</div>
-        <p class="step-desc">Send us your drawing, sketch, or just describe what you need ? via WhatsApp, email, or our quote form.</p>
+        <p class="step-desc">Send us your drawing, sketch, or just describe what you need — via WhatsApp, email, or our quote form.</p>
       </div>
       <div class="process-connector">
         <div class="connector-line"></div>
@@ -2527,7 +2540,7 @@ footer{
       </div>
     </div>
     <div style="text-align:center;margin-top:56px" class="reveal">
-      <a href="https://wa.me/918892181792?text=Hello,%20I%20visited%20your%20website%20and%20would%20like%20to%20know%20more%20about%20your%20CNC%20Punching%20and%20Laser%20Cutting%20services." class="btn-primary" target="_blank" rel="noopener noreferrer">Start Your Order ?</a>
+      <a href="https://wa.me/918892181792?text=Hello,%20I%20visited%20your%20website%20and%20would%20like%20to%20know%20more%20about%20your%20CNC%20Punching%20and%20Laser%20Cutting%20services." class="btn-primary" target="_blank" rel="noopener noreferrer">Start Your Order →</a>
     </div>
   </div>
 </section>
@@ -2553,7 +2566,7 @@ footer{
       <div class="why-card reveal" style="transition-delay:.15s">
         <span class="why-icon">🏭</span>
         <div class="why-title">IN-HOUSE FACILITY</div>
-        <p class="why-desc">Full-stack metal works under one roof ? punching, cutting, bending, and assembly.</p>
+        <p class="why-desc">Full-stack metal works under one roof — punching, cutting, bending, and assembly.</p>
       </div>
       <div class="why-card reveal" style="transition-delay:.2s">
         <span class="why-icon">🤝</span>
@@ -2801,7 +2814,7 @@ footer{
             <div class="form-row">
               <div class="form-group full">
                 <label for="fmessage">Your Requirements *</label>
-                <textarea id="fmessage" name="message" rows="4" placeholder="Describe your requirement ? quantity, dimensions, deadline?" maxlength="1200" required></textarea>
+                <textarea id="fmessage" name="message" rows="4" placeholder="Describe your requirement — quantity, dimensions, deadline?" maxlength="1200" required></textarea>
               </div>
             </div>
             <div class="captcha-field" data-turnstile="inquiry"></div>

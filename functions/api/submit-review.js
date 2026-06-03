@@ -102,7 +102,8 @@ export async function onRequestPost(context) {
     await insertReview(context.env, payload);
     return json(200, { ok: true, message: "Review submitted for approval." });
   } catch (error) {
-    return json(500, { error: error.message || "Could not submit review." });
+    console.error(error);
+    return json(500, { error: "Could not submit review. Please try again later." });
   }
 }
 

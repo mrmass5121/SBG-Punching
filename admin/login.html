@@ -1,0 +1,50 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#070b10">
+  <title>Admin Login | SBG Punching</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/admin.css">
+<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+</head>
+<body class="login-body">
+  <img class="admin-bg-video" src="../assets/videos/admin-storm-background.gif" alt="" aria-hidden="true">
+  <div class="admin-bg-overlay" aria-hidden="true"></div>
+  <main class="login-shell">
+    <section class="login-brand">
+      <p class="eyebrow"><span class="live-dot"></span> Secure operations</p>
+      <h1>Admin control room</h1>
+      <div class="login-readouts">
+        <div><strong>RLS</strong><span>Database policies</span></div>
+        <div><strong>JWT</strong><span>Session validation</span></div>
+        <div><strong>MFA</strong><span>Ready to enforce</span></div>
+      </div>
+    </section>
+
+    <form class="login-card" id="loginForm">
+      <div class="login-card-head">
+        <span class="brand-mark">SBG</span>
+        <div><p class="eyebrow">Restricted entry</p><h2>Login</h2></div>
+      </div>
+      <label>Email<input type="email" name="email" autocomplete="username" required placeholder=""></label>
+      <label>Password<input type="password" name="password" autocomplete="current-password" required placeholder=""></label>
+      <button class="btn" type="submit"><i data-lucide="log-in"></i> Sign In</button>
+      <p class="form-status" id="loginStatus" role="status"></p>
+      <small class="security-note">After five failed attempts this browser is cooled down briefly. Use Supabase MFA policies for stronger production enforcement.</small>
+    </form>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+  <script src="../js/config.js"></script>
+  <script type="module" src="../js/admin.js"></script>
+
+  <!-- Vercel Speed Insights -->
+  <script type="module" src="../js/speed-insights.js?v=2"></script>
+</body>
+</html>
+

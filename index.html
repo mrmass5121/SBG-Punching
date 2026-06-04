@@ -3618,13 +3618,13 @@ function productRecommendedCard(product,index){
   </article>`;
 }
 function featuredCollectionProducts(){
-  return products.filter(product=>product.featured).slice(0,30);
+  return products.filter(product=>product.featured);
 }
 function collectionProducts(){
-  return products.slice(0,30);
+  return products;
 }
 function customisedDesignProducts(){
-  return products.filter(isCustomisedDesignProduct).slice(0,30);
+  return products.filter(isCustomisedDesignProduct);
 }
 function wishlistCollectionProducts(){
   return products.filter(product=>productWishlist.has(productSlug(product)));

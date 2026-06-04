@@ -3328,7 +3328,7 @@ function mapProduction(row){
 
 // Public reads are protected by Supabase RLS. If config is not set, the
 // gallery stays empty until real production records are available.
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 let galleryPage = 0;
 let galleryHasMore = true;
 async function loadProducts(){
@@ -3488,7 +3488,7 @@ async function loadReviews(){
     .select('product_slug,rating,reviewer_name,comment,created_at')
     .eq('approved',true)
     .order('created_at',{ascending:false})
-    .limit(20);
+    .limit(15);
   if(error){
     console.warn('Review fallback active:',error.message||error);
     productReviews=fallbackReviews();

@@ -2993,7 +2993,12 @@ for(let i=0;i<particleCount;i++)particles.push(new Particle());
     running=!document.hidden;
     if(running)loop();
   });
-  function loop(){
+    const heroObs=new IntersectionObserver(([entry])=>{
+    running=entry.isIntersecting&&!document.hidden;
+    if(running)loop();
+  },{threshold:0});
+  heroObs.observe(canvas);
+    function loop(){
     if(!running)return;
     ctx.clearRect(0,0,W,H);
     // connections
@@ -3323,7 +3328,7 @@ function mapProduction(row){
 
 // Public reads are protected by Supabase RLS. If config is not set, the
 // gallery stays empty until real production records are available.
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 let galleryPage = 0;
 let galleryHasMore = true;
 async function loadProducts(){
@@ -3356,7 +3361,7 @@ async function loadProducts(){
       // If we got fewer than PAGE_SIZE, no more pages exist
       if(fetched.length < PAGE_SIZE) galleryHasMore=false;
     }else{
-      const res=await fetch('/products.json',{cache:'no-store'});
+      const res = await fetch('/products.json', { cache: 'default' });
       if(res.ok){
         const data=await res.json();
         if(data&&data.products&&data.products.length){
@@ -3483,7 +3488,7 @@ async function loadReviews(){
     .select('product_slug,rating,reviewer_name,comment,created_at')
     .eq('approved',true)
     .order('created_at',{ascending:false})
-    .limit(500);
+    .limit(20);
   if(error){
     console.warn('Review fallback active:',error.message||error);
     productReviews=fallbackReviews();

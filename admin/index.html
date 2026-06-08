@@ -375,5 +375,88 @@
   <script src="../js/supabase.min.js"></script>
   <script src="../js/config.js"></script>
   <script type="module" src="../js/admin.js"></script>
+  <script>
+  (function(){
+    const key='sbg_local_quote_inquiries';
+    const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const localRows=()=>{
+      try{
+        const rows=JSON.parse(localStorage.getItem(key)||'[]');
+        return Array.isArray(rows)?rows:[];
+      }catch{
+        return [];
+      }
+    };
+    const productUrl=item=>{
+      const direct=String(item.product_url||'').trim();
+      const match=String(item.message||'').match(/Product URL:\s*(https?:\/\/\S+)/i);
+      return direct||(match?match[1]:'');
+    };
+    const cleanMessage=item=>String(item.message||'')
+      .split(/\r?\n/)
+      .map(line=>line.trim())
+      .filter(line=>line&&!/^Product URL:/i.test(line)&&!/^Product Image:/i.test(line))
+      .join(' ')
+      .slice(0,260);
+    const formatDate=value=>{
+      const date=new Date(value||Date.now());
+      return Number.isNaN(date.getTime())?'':date.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    };
+    function localInquiryRow(item){
+      const url=productUrl(item);
+      const contact=[item.company_name,item.phone,item.email].filter(Boolean).map(esc).join('<br>');
+      return `<tr data-local-inquiry="${esc(item.id||'local')}">
+        <td><span class="table-thumb empty"><i data-lucide="image-off"></i></span></td>
+        <td><strong>${esc(item.contact_name||'Gallery Visitor')}</strong>${contact?`<br>${contact}`:''}</td>
+        <td>Production Gallery</td>
+        <td>${esc(item.service||'Production Item')}</td>
+        <td>${url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open Product</a>`:'<span class="readonly-note">-</span>'}</td>
+        <td>${esc(cleanMessage(item))}</td>
+        <td>${formatDate(item.created_at)}</td>
+        <td><span class="status-pill queued">${esc(item.status||'New')}</span></td>
+        <td><span class="readonly-note">Local</span></td>
+      </tr>`;
+    }
+    function patchDashboardCount(localCount){
+      const stats=document.getElementById('adminStats');
+      if(stats&&!stats.innerHTML.trim()&&localCount){
+        stats.innerHTML=`<div class="stat-card"><strong>${localCount}</strong><span>Inquiries</span></div>`;
+        return;
+      }
+      const card=[...(stats?.querySelectorAll('.stat-card')||[])].find(item=>/Inquiries/i.test(item.textContent));
+      const value=card?.querySelector('strong');
+      if(value){
+        if(!card.dataset.remoteValue)card.dataset.remoteValue=String(Number(value.textContent.replace(/\D/g,''))||0);
+        value.textContent=String((Number(card.dataset.remoteValue)||0)+localCount);
+      }
+    }
+    function patchSourceLabels(){
+      document.querySelectorAll('#inquiryRows tr').forEach(row=>{
+        const source=row.children[2];
+        const message=row.children[5];
+        if(source&&message&&/Source:\s*Production Gallery/i.test(message.textContent)){
+          source.textContent='Production Gallery';
+        }
+      });
+    }
+    function renderLocalInquiries(){
+      const tbody=document.getElementById('inquiryRows');
+      if(!tbody)return;
+      tbody.querySelectorAll('[data-local-inquiry]').forEach(row=>row.remove());
+      const rows=localRows();
+      const empty=tbody.querySelector('td[colspan]');
+      if(rows.length&&empty)tbody.innerHTML='';
+      if(rows.length)tbody.insertAdjacentHTML('afterbegin',rows.map(localInquiryRow).join(''));
+      patchDashboardCount(rows.length);
+      patchSourceLabels();
+      window.lucide?.createIcons();
+    }
+    document.addEventListener('DOMContentLoaded',()=>{
+      renderLocalInquiries();
+      [600,1500,3000].forEach(delay=>setTimeout(renderLocalInquiries,delay));
+      document.getElementById('refreshInquiries')?.addEventListener('click',()=>setTimeout(renderLocalInquiries,400));
+    });
+  })();
+  </script>
 </body>
 </html>

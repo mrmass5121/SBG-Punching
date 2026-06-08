@@ -964,6 +964,7 @@ nav{display:flex;align-items:center;gap:4px}
   font-weight: 800;
 }
 .quote-form input,
+.quote-form select,
 .quote-form textarea {
   width: 100%;
   min-height: 46px;
@@ -973,6 +974,9 @@ nav{display:flex;align-items:center;gap:4px}
   background: rgba(11,15,20,.78);
   color: var(--text);
   font: inherit;
+}
+.quote-form select {
+  cursor: pointer;
 }
 .quote-form textarea {
   min-height: 100px;
@@ -2910,6 +2914,16 @@ footer{
       <label for="quoteDescription">Description (optional)
         <textarea id="quoteDescription" name="description" rows="4" maxlength="700"></textarea>
       </label>
+      <label for="quoteMailProvider">Mail Provider
+        <select id="quoteMailProvider" name="mail_provider">
+          <option value="gmail">Gmail</option>
+          <option value="outlook">Outlook</option>
+          <option value="yahoo">Yahoo Mail</option>
+          <option value="icloud">iCloud Mail</option>
+          <option value="proton">Proton Mail</option>
+          <option value="default">Other / Default Mail App</option>
+        </select>
+      </label>
       <div class="captcha-field" data-turnstile="quote"></div>
       <div class="quote-actions">
         <button class="quote-send whatsapp" type="submit" data-quote-channel="whatsapp">Send WhatsApp</button>
@@ -4130,10 +4144,25 @@ function quoteContactMessage(product,details){
     currentProductUrl(product)
   ].filter(Boolean).join('\n');
 }
-function quoteMailUrl(product,details){
+function quoteMailUrl(product,details,provider='gmail'){
+  const to=encodeURIComponent(QUOTE_EMAIL);
   const subject=encodeURIComponent(`Quote request - ${product?.name||'Production Item'}`);
   const body=encodeURIComponent(quoteContactMessage(product,details));
-  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(QUOTE_EMAIL)}&su=${subject}&body=${body}`;
+  switch(provider){
+    case 'outlook':
+      return `https://outlook.live.com/mail/0/deeplink/compose?to=${to}&subject=${subject}&body=${body}`;
+    case 'yahoo':
+      return `https://compose.mail.yahoo.com/?to=${to}&subject=${subject}&body=${body}`;
+    case 'icloud':
+      return 'https://www.icloud.com/mail/';
+    case 'proton':
+      return 'https://mail.proton.me/u/0/inbox#compose';
+    case 'default':
+      return `mailto:${QUOTE_EMAIL}?subject=${subject}&body=${body}`;
+    case 'gmail':
+    default:
+      return `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+  }
 }
 function quoteWhatsappUrl(product,details){
   const phone=SBG_CFG.whatsappNumber||QUOTE_WHATSAPP;
@@ -4240,6 +4269,7 @@ async function submitQuoteRequest(event){
     email:form.elements.email.value.trim().slice(0,180),
     city:form.elements.city.value.trim().slice(0,100),
     description:form.elements.description.value.trim().slice(0,700),
+    mailProvider:form.elements.mail_provider?.value||'gmail',
     captchaToken:captchaToken('quote',document.getElementById('quoteModal')||document)
   };
   if(!activeQuoteProduct){status.textContent='Please choose a production item.';return}
@@ -4251,20 +4281,19 @@ async function submitQuoteRequest(event){
     status.textContent='Please complete the security check.';
     return;
   }
-  const destinationWindow=channel==='whatsapp'?window.open('about:blank','_blank'):null;
+  const destinationWindow=window.open('about:blank','_blank');
+  if(destinationWindow)destinationWindow.opener=null;
   form.querySelectorAll('.quote-send').forEach(button=>{button.disabled=true;});
   status.textContent='Saving inquiry...';
   try{
     await saveGalleryQuoteInquiry(activeQuoteProduct,details);
     try{localStorage.setItem('sbg_last_inquiry',String(Date.now()));}catch(error){}
     status.textContent=channel==='email'?'Opening email...':'Opening WhatsApp...';
-    const destination=channel==='email'?quoteMailUrl(activeQuoteProduct,details):quoteWhatsappUrl(activeQuoteProduct,details);
-    if(channel==='email'){
-      window.location.href=destination;
-    }else if(destinationWindow){
+    const destination=channel==='email'?quoteMailUrl(activeQuoteProduct,details,details.mailProvider):quoteWhatsappUrl(activeQuoteProduct,details);
+    if(destinationWindow){
       destinationWindow.location.href=destination;
     }else{
-      window.location.href=destination;
+      window.open(destination,'_blank','noopener');
     }
     if(channel==='whatsapp')setTimeout(closeProductQuoteModal,500);
   }finally{

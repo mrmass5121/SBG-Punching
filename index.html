@@ -4133,7 +4133,7 @@ function quoteContactMessage(product,details){
 function quoteMailUrl(product,details){
   const subject=encodeURIComponent(`Quote request - ${product?.name||'Production Item'}`);
   const body=encodeURIComponent(quoteContactMessage(product,details));
-  return `mailto:${QUOTE_EMAIL}?subject=${subject}&body=${body}`;
+  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(QUOTE_EMAIL)}&su=${subject}&body=${body}`;
 }
 function quoteWhatsappUrl(product,details){
   const phone=SBG_CFG.whatsappNumber||QUOTE_WHATSAPP;
@@ -4141,7 +4141,7 @@ function quoteWhatsappUrl(product,details){
 }
 function galleryQuotePayload(product,details){
   const productUrl=currentProductUrl(product);
-  const productImg=productImage(product);
+  const productImg=absoluteUrl(productImage(product))||productImage(product);
   const message=[
     'Source: Production Gallery',
     productMessageDetails(product),

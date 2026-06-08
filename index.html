@@ -4139,7 +4139,7 @@ function quoteContactMessage(product,details){
     `City: ${details.city}`,
     '',
     productMessageDetails(product),
-    details.description?`Description: ${details.description}`:'',
+    `Description: ${details.description||'No description'}`,
     '',
     currentProductUrl(product)
   ].filter(Boolean).join('\n');
@@ -4173,13 +4173,14 @@ function galleryQuotePayload(product,details){
   const productImg=absoluteUrl(productImage(product))||productImage(product);
   const message=[
     'Source: Production Gallery',
+    `Description: ${details.description||'No description'}`,
+    '',
     productMessageDetails(product),
     '',
     `Name: ${details.name}`,
     `Mobile: ${details.mobile}`,
     `Email: ${details.email}`,
     `City: ${details.city}`,
-    details.description?`Description: ${details.description}`:'',
     '',
     `Product URL: ${productUrl}`,
     productImg?`Product Image: ${productImg}`:''

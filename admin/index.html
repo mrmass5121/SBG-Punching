@@ -402,12 +402,19 @@
         ? `<span class="table-thumb"><img src="${esc(image)}" alt="${esc(item.service||'Production preview')}" loading="lazy" decoding="async"></span>`
         : `<span class="table-thumb empty"><i data-lucide="image-off"></i></span>`;
     };
-    const cleanMessage=item=>String(item.message||'')
-      .split(/\r?\n/)
-      .map(line=>line.trim())
-      .filter(line=>line&&!/^Product URL:/i.test(line)&&!/^Product Image:/i.test(line))
-      .join(' ')
-      .slice(0,260);
+    const descriptionOnly=value=>{
+      const text=String(value||'').trim();
+      const description=text.match(/Description:\s*([\s\S]*?)(?:\s+Product URL:|\s+Product Image:|$)/i);
+      if(description&&description[1].trim())return description[1].trim().slice(0,260);
+      if(/Source:\s*Production Gallery/i.test(text))return 'No description';
+      return text
+        .split(/\r?\n/)
+        .map(line=>line.trim())
+        .filter(line=>line&&!/^Product URL:/i.test(line)&&!/^Product Image:/i.test(line))
+        .join(' ')
+        .slice(0,260);
+    };
+    const cleanMessage=item=>descriptionOnly(item.message);
     const formatDate=value=>{
       const date=new Date(value||Date.now());
       return Number.isNaN(date.getTime())?'':date.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
@@ -455,6 +462,7 @@
         if(source&&message&&/Source:\s*Production Gallery/i.test(message.textContent)){
           source.textContent='Production Gallery';
         }
+        if(message)message.textContent=descriptionOnly(message.textContent);
       });
     }
     function renderLocalInquiries(){

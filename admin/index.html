@@ -392,6 +392,16 @@
       const match=String(item.message||'').match(/Product URL:\s*(https?:\/\/\S+)/i);
       return direct||(match?match[1]:'');
     };
+    const productImage=item=>{
+      const match=String(item.message||'').match(/Product Image:\s*(\S+)/i);
+      return match?match[1]:'';
+    };
+    const previewCell=item=>{
+      const image=productImage(item);
+      return image
+        ? `<span class="table-thumb"><img src="${esc(image)}" alt="${esc(item.service||'Production preview')}" loading="lazy" decoding="async"></span>`
+        : `<span class="table-thumb empty"><i data-lucide="image-off"></i></span>`;
+    };
     const cleanMessage=item=>String(item.message||'')
       .split(/\r?\n/)
       .map(line=>line.trim())
@@ -406,7 +416,7 @@
       const url=productUrl(item);
       const contact=[item.company_name,item.phone,item.email].filter(Boolean).map(esc).join('<br>');
       return `<tr data-local-inquiry="${esc(item.id||'local')}">
-        <td><span class="table-thumb empty"><i data-lucide="image-off"></i></span></td>
+        <td>${previewCell(item)}</td>
         <td><strong>${esc(item.contact_name||'Gallery Visitor')}</strong>${contact?`<br>${contact}`:''}</td>
         <td>Production Gallery</td>
         <td>${esc(item.service||'Production Item')}</td>
@@ -416,6 +426,14 @@
         <td><span class="status-pill queued">${esc(item.status||'New')}</span></td>
         <td><span class="readonly-note">Local</span></td>
       </tr>`;
+    }
+    function remoteInquiryExists(tbody,item){
+      const needle=[item.phone,item.email,item.service].filter(Boolean).map(value=>String(value).toLowerCase());
+      if(needle.length<2)return false;
+      return [...tbody.querySelectorAll('tr:not([data-local-inquiry])')].some(row=>{
+        const text=row.textContent.toLowerCase();
+        return needle.every(value=>text.includes(value));
+      });
     }
     function patchDashboardCount(localCount){
       const stats=document.getElementById('adminStats');
@@ -443,7 +461,7 @@
       const tbody=document.getElementById('inquiryRows');
       if(!tbody)return;
       tbody.querySelectorAll('[data-local-inquiry]').forEach(row=>row.remove());
-      const rows=localRows();
+      const rows=localRows().filter(item=>!remoteInquiryExists(tbody,item));
       const empty=tbody.querySelector('td[colspan]');
       if(rows.length&&empty)tbody.innerHTML='';
       if(rows.length)tbody.insertAdjacentHTML('afterbegin',rows.map(localInquiryRow).join(''));

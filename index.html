@@ -4130,7 +4130,10 @@ function saveLocalQuoteInquiry(payload){
   }
 }
 function quoteContactMessage(product,details){
+  const productUrl=currentProductUrl(product);
   return [
+    productUrl,
+    '',
     'New Production Gallery Quote Request',
     '',
     `Name: ${details.name}`,
@@ -4139,9 +4142,7 @@ function quoteContactMessage(product,details){
     `City: ${details.city}`,
     '',
     productMessageDetails(product),
-    `Description: ${details.description||'No description'}`,
-    '',
-    currentProductUrl(product)
+    `Description: ${details.description||'No description'}`
   ].filter(Boolean).join('\n');
 }
 function quoteMailUrl(product,details,provider='gmail'){
@@ -4324,7 +4325,10 @@ function bindQuoteRequestModal(){
 }
 bindQuoteRequestModal();
 function productShareMessage(product){
+  const url=currentProductUrl(product);
   return [
+    url,
+    '',
     `${product?.name||'Production Item'} | S.B.G. Punching`,
     '',
     productMessageDetails(product)

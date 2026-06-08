@@ -880,6 +880,155 @@ nav{display:flex;align-items:center;gap:4px}
   background: var(--green2);
   color: #001007;
 }
+.quote-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.quote-modal[hidden] {
+  display: none;
+}
+.quote-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.74);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.quote-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 100%);
+  max-height: calc(100svh - 40px);
+  overflow: auto;
+  border: 1px solid var(--border-green);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(19,26,34,.98), rgba(11,15,20,.98));
+  box-shadow: 0 24px 80px rgba(0,0,0,.52), 0 0 34px rgba(0,200,83,.13);
+}
+.quote-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 22px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.quote-modal-head h3 {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--ff-display);
+  font-size: 2.1rem;
+  line-height: 1;
+}
+.quote-product-name {
+  display: block;
+  margin-top: 6px;
+  color: var(--green);
+  font-size: .9rem;
+  font-weight: 800;
+}
+.quote-close {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  font-size: 1.15rem;
+}
+.quote-close:hover,
+.quote-close:focus-visible {
+  border-color: var(--green);
+  color: var(--green);
+}
+.quote-form {
+  display: grid;
+  gap: 14px;
+  padding: 20px 22px 22px;
+}
+.quote-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.quote-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--text2);
+  font-size: .82rem;
+  font-weight: 800;
+}
+.quote-form input,
+.quote-form textarea {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: rgba(11,15,20,.78);
+  color: var(--text);
+  font: inherit;
+}
+.quote-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.quote-form input:focus,
+.quote-form textarea:focus {
+  border-color: var(--green);
+  outline: 0;
+}
+.quote-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.quote-send {
+  min-height: 46px;
+  border-radius: 8px;
+  font-weight: 900;
+}
+.quote-send.whatsapp {
+  background: #25D366;
+  color: #fff;
+}
+.quote-send.email {
+  border: 1px solid var(--border-green);
+  background: rgba(0,200,83,.1);
+  color: var(--green);
+}
+.quote-send:disabled {
+  cursor: wait;
+  opacity: .62;
+}
+.quote-status {
+  min-height: 20px;
+  color: var(--steel);
+  font-size: .84rem;
+}
+@media(max-width:600px) {
+  .quote-modal {
+    padding: 12px;
+  }
+  .quote-modal-panel {
+    max-height: calc(100svh - 24px);
+  }
+  .quote-modal-head {
+    padding: 18px 16px 14px;
+  }
+  .quote-form {
+    padding: 16px;
+  }
+  .quote-form-grid,
+  .quote-actions {
+    grid-template-columns: 1fr;
+  }
+}
 .production-gallery-controls {
   display: flex;
   justify-content: center;
@@ -2732,6 +2881,45 @@ footer{
   <button class="lb-nav lb-next" onclick="event.stopPropagation();lightboxNav(1)">&#8594;</button>
 </div>
 
+<!-- QUOTE REQUEST MODAL -->
+<div id="quoteModal" class="quote-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="quoteModalTitle" hidden>
+  <div class="quote-modal-backdrop" data-close-quote></div>
+  <div class="quote-modal-panel">
+    <div class="quote-modal-head">
+      <div>
+        <h3 id="quoteModalTitle">Request Quote</h3>
+        <span class="quote-product-name" id="quoteProductName">Production item</span>
+      </div>
+      <button class="quote-close" type="button" data-close-quote aria-label="Close quote form">x</button>
+    </div>
+    <form id="quoteRequestForm" class="quote-form">
+      <div class="quote-form-grid">
+        <label for="quoteName">Name *
+          <input id="quoteName" name="name" type="text" autocomplete="name" maxlength="140" required>
+        </label>
+        <label for="quoteMobile">Mobile Number *
+          <input id="quoteMobile" name="mobile" type="tel" autocomplete="tel" inputmode="tel" maxlength="40" required>
+        </label>
+        <label for="quoteEmail">Mail *
+          <input id="quoteEmail" name="email" type="email" autocomplete="email" maxlength="180" required>
+        </label>
+        <label for="quoteCity">City *
+          <input id="quoteCity" name="city" type="text" autocomplete="address-level2" maxlength="100" required>
+        </label>
+      </div>
+      <label for="quoteDescription">Description (optional)
+        <textarea id="quoteDescription" name="description" rows="4" maxlength="700"></textarea>
+      </label>
+      <div class="captcha-field" data-turnstile="quote"></div>
+      <div class="quote-actions">
+        <button class="quote-send whatsapp" type="submit" data-quote-channel="whatsapp">Send WhatsApp</button>
+        <button class="quote-send email" type="submit" data-quote-channel="email">Send Email</button>
+      </div>
+      <p class="quote-status" id="quoteStatus" role="status"></p>
+    </form>
+  </div>
+</div>
+
 <!-- ═══════════ CONTACT ═══════════ -->
 <section id="contact" class="enquiry-section">
   <div class="section-inner">
@@ -3069,6 +3257,9 @@ let pendingReviewRating=5;
 const WISHLIST_STORAGE_KEY='sbg_product_wishlist';
 let productWishlist=new Set(loadWishlistSlugs());
 const SBG_CFG=window.SBG_CONFIG||{};
+const QUOTE_INQUIRY_STORAGE_KEY='sbg_local_quote_inquiries';
+const QUOTE_EMAIL='sbgpunching@gmail.com';
+const QUOTE_WHATSAPP='918892181792';
 function hasConfigValue(value){
   const text=String(value||'').trim();
   return Boolean(text)&&!/^YOUR_/i.test(text)&&!/^PASTE_/i.test(text)&&!/[<>]/.test(text);
@@ -3896,6 +4087,212 @@ async function logQuoteClick(product){
     console.warn('Gallery inquiry track failed:',err);
   }
 }
+function validEmail(value){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||'').trim());
+}
+function loadLocalQuoteInquiries(){
+  try{
+    const rows=JSON.parse(localStorage.getItem(QUOTE_INQUIRY_STORAGE_KEY)||'[]');
+    return Array.isArray(rows)?rows:[];
+  }catch{
+    return [];
+  }
+}
+function saveLocalQuoteInquiry(payload){
+  const localPayload={...payload};
+  delete localPayload.captchaToken;
+  const rows=loadLocalQuoteInquiries();
+  rows.unshift({
+    ...localPayload,
+    id:`local-${Date.now()}`,
+    created_at:new Date().toISOString(),
+    status:'New',
+    local_only:true
+  });
+  try{
+    localStorage.setItem(QUOTE_INQUIRY_STORAGE_KEY,JSON.stringify(rows.slice(0,80)));
+  }catch(error){
+    console.warn('Local quote inquiry save failed:',error.message||error);
+  }
+}
+function quoteContactMessage(product,details){
+  return [
+    'New Production Gallery Quote Request',
+    '',
+    `Name: ${details.name}`,
+    `Mobile: ${details.mobile}`,
+    `Email: ${details.email}`,
+    `City: ${details.city}`,
+    '',
+    productMessageDetails(product),
+    details.description?`Description: ${details.description}`:'',
+    '',
+    currentProductUrl(product)
+  ].filter(Boolean).join('\n');
+}
+function quoteMailUrl(product,details){
+  const subject=encodeURIComponent(`Quote request - ${product?.name||'Production Item'}`);
+  const body=encodeURIComponent(quoteContactMessage(product,details));
+  return `mailto:${QUOTE_EMAIL}?subject=${subject}&body=${body}`;
+}
+function quoteWhatsappUrl(product,details){
+  const phone=SBG_CFG.whatsappNumber||QUOTE_WHATSAPP;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(quoteContactMessage(product,details))}`;
+}
+function galleryQuotePayload(product,details){
+  const productUrl=currentProductUrl(product);
+  const productImg=productImage(product);
+  const message=[
+    'Source: Production Gallery',
+    productMessageDetails(product),
+    '',
+    `Name: ${details.name}`,
+    `Mobile: ${details.mobile}`,
+    `Email: ${details.email}`,
+    `City: ${details.city}`,
+    details.description?`Description: ${details.description}`:'',
+    '',
+    `Product URL: ${productUrl}`,
+    productImg?`Product Image: ${productImg}`:''
+  ].filter(Boolean).join('\n').trim();
+  return {
+    contact_name:details.name,
+    company_name:`City: ${details.city}`,
+    phone:details.mobile,
+    email:details.email,
+    source:'production-gallery-form',
+    service:product?.name||'Production Item',
+    message,
+    product_url:productUrl||'',
+    captchaToken:details.captchaToken||''
+  };
+}
+async function insertInquiryDirect(payload){
+  if(!sbgClient)return false;
+  const {captchaToken:_token,...row}=payload;
+  let {error}=await sbgClient.from('inquiries').insert([row]);
+  if(error&&(error.code==='PGRST204'||/product_url/i.test(error.message||''))){
+    const {product_url:_url,...withoutProductUrl}=row;
+    ({error}=await sbgClient.from('inquiries').insert([withoutProductUrl]));
+  }
+  if(error)throw error;
+  return true;
+}
+async function saveGalleryQuoteInquiry(product,details){
+  const payload=galleryQuotePayload(product,details);
+  try{
+    if(await insertInquiryDirect(payload))return true;
+  }catch(error){
+    console.warn('Gallery quote direct insert failed:',error.message||error);
+  }
+  if(payload.captchaToken){
+    try{
+      await postJson(serverlessEndpoint('submit-inquiry'),payload);
+      return true;
+    }catch(error){
+      console.warn('Gallery quote endpoint insert failed:',error.message||error);
+    }
+  }
+  saveLocalQuoteInquiry(payload);
+  return false;
+}
+let activeQuoteProduct=null;
+let quotePreviousOverflow='';
+function openProductQuoteModal(product){
+  const modal=document.getElementById('quoteModal');
+  const form=document.getElementById('quoteRequestForm');
+  if(!modal||!form||!product)return;
+  activeQuoteProduct=product;
+  quotePreviousOverflow=document.body.style.overflow;
+  document.getElementById('quoteProductName').textContent=product.name||'Production item';
+  document.getElementById('quoteStatus').textContent='';
+  form.reset();
+  modal.removeAttribute('hidden');
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+  renderTurnstileWidgets(modal);
+  setTimeout(()=>document.getElementById('quoteName')?.focus(),30);
+}
+function closeProductQuoteModal(){
+  const modal=document.getElementById('quoteModal');
+  if(!modal)return;
+  modal.setAttribute('hidden','');
+  modal.setAttribute('aria-hidden','true');
+  activeQuoteProduct=null;
+  resetCaptcha('quote',modal);
+  document.body.style.overflow=document.getElementById('lightbox')?.classList.contains('open')?'hidden':quotePreviousOverflow;
+}
+function quoteProductFromTrigger(trigger){
+  const card=trigger.closest('[data-product-index]');
+  if(card)return products[Number(card.dataset.productIndex||0)];
+  if(document.getElementById('lightbox')?.contains(trigger))return lbProducts[lbIndex]||products[currentProductIndex];
+  if(currentProductIndex>=0)return products[currentProductIndex];
+  return null;
+}
+async function submitQuoteRequest(event){
+  event.preventDefault();
+  const form=event.currentTarget;
+  const status=document.getElementById('quoteStatus');
+  const channel=event.submitter?.dataset.quoteChannel||'whatsapp';
+  const details={
+    name:form.elements.name.value.trim().slice(0,140),
+    mobile:form.elements.mobile.value.trim().slice(0,40),
+    email:form.elements.email.value.trim().slice(0,180),
+    city:form.elements.city.value.trim().slice(0,100),
+    description:form.elements.description.value.trim().slice(0,700),
+    captchaToken:captchaToken('quote',document.getElementById('quoteModal')||document)
+  };
+  if(!activeQuoteProduct){status.textContent='Please choose a production item.';return}
+  if(!details.name){status.textContent='Please enter your name.';return}
+  if(!details.mobile||!validPhone(details.mobile)){status.textContent='Please enter a valid mobile number.';return}
+  if(!details.email||!validEmail(details.email)){status.textContent='Please enter a valid email address.';return}
+  if(!details.city){status.textContent='Please enter your city.';return}
+  if(turnstileEnabled()&&!details.captchaToken){
+    status.textContent='Please complete the security check.';
+    return;
+  }
+  const destinationWindow=channel==='whatsapp'?window.open('about:blank','_blank'):null;
+  form.querySelectorAll('.quote-send').forEach(button=>{button.disabled=true;});
+  status.textContent='Saving inquiry...';
+  try{
+    await saveGalleryQuoteInquiry(activeQuoteProduct,details);
+    try{localStorage.setItem('sbg_last_inquiry',String(Date.now()));}catch(error){}
+    status.textContent=channel==='email'?'Opening email...':'Opening WhatsApp...';
+    const destination=channel==='email'?quoteMailUrl(activeQuoteProduct,details):quoteWhatsappUrl(activeQuoteProduct,details);
+    if(channel==='email'){
+      window.location.href=destination;
+    }else if(destinationWindow){
+      destinationWindow.location.href=destination;
+    }else{
+      window.location.href=destination;
+    }
+    if(channel==='whatsapp')setTimeout(closeProductQuoteModal,500);
+  }finally{
+    form.querySelectorAll('.quote-send').forEach(button=>{button.disabled=false;});
+  }
+}
+function bindQuoteRequestModal(){
+  document.addEventListener('click',event=>{
+    const close=event.target.closest('[data-close-quote]');
+    if(close){
+      event.preventDefault();
+      closeProductQuoteModal();
+      return;
+    }
+    const quote=event.target.closest('.product-quote-action,.shop-quote-btn');
+    if(!quote)return;
+    const product=quoteProductFromTrigger(quote);
+    if(!product)return;
+    event.preventDefault();
+    event.stopPropagation();
+    openProductQuoteModal(product);
+  },true);
+  document.getElementById('quoteRequestForm')?.addEventListener('submit',submitQuoteRequest);
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&!document.getElementById('quoteModal')?.hasAttribute('hidden'))closeProductQuoteModal();
+  });
+}
+bindQuoteRequestModal();
 function productShareMessage(product){
   return [
     `${product?.name||'Production Item'} | S.B.G. Punching`,

@@ -379,6 +379,8 @@
   (function(){
     const key='sbg_local_quote_inquiries';
     const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    let remoteInquiries=[];
+    let patching=false;
     const localRows=()=>{
       try{
         const rows=JSON.parse(localStorage.getItem(key)||'[]');
@@ -404,8 +406,8 @@
     };
     const descriptionOnly=value=>{
       const text=String(value||'').trim();
-      const description=text.match(/Description:\s*([\s\S]*?)(?:\s+Product URL:|\s+Product Image:|$)/i);
-      if(description&&description[1].trim())return description[1].trim().slice(0,260);
+      const description=text.match(/Description:\s*([\s\S]*?)(?:\s+Product:|\s+Category:|\s+Name:|\s+Mobile:|\s+Product URL:|\s+Product Image:|$)/i);
+      if(description&&description[1].trim())return description[1].trim().replace(/^No description$/i,'No description').slice(0,260);
       if(/Source:\s*Production Gallery/i.test(text))return 'No description';
       return text
         .split(/\r?\n/)
@@ -442,6 +444,47 @@
         return needle.every(value=>text.includes(value));
       });
     }
+    function matchingRemoteInquiry(row){
+      const contact=(row.children[1]?.textContent||'').toLowerCase();
+      const service=(row.children[3]?.textContent||'').trim().toLowerCase();
+      return remoteInquiries.find(item=>{
+        const phone=String(item.phone||'').toLowerCase();
+        const email=String(item.email||'').toLowerCase();
+        const itemService=String(item.service||'').trim().toLowerCase();
+        const phoneMatch=!phone||contact.includes(phone);
+        const emailMatch=!email||contact.includes(email);
+        const serviceMatch=!service||!itemService||service.includes(itemService)||itemService.includes(service);
+        return serviceMatch&&(phoneMatch||emailMatch);
+      });
+    }
+    function patchRemoteDescriptions(){
+      if(!remoteInquiries.length)return;
+      document.querySelectorAll('#inquiryRows tr:not([data-local-inquiry])').forEach(row=>{
+        const item=matchingRemoteInquiry(row);
+        const message=row.children[5];
+        const source=row.children[2];
+        if(!item||!message)return;
+        message.textContent=descriptionOnly(item.message);
+        if(source&&/production-gallery/i.test(String(item.source||''))){
+          source.textContent='Production Gallery';
+        }
+      });
+    }
+    async function loadRemoteInquiries(){
+      const cfg=window.SBG_CONFIG||{};
+      if(!window.supabase||!cfg.supabaseUrl||!cfg.supabaseAnonKey)return;
+      try{
+        const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{
+          auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+        });
+        const {data,error}=await client.from('inquiries').select('*').order('created_at',{ascending:false}).limit(80);
+        if(error)throw error;
+        remoteInquiries=data||[];
+        patchRemoteDescriptions();
+      }catch(error){
+        console.warn('Inquiry description patch failed:',error.message||error);
+      }
+    }
     function patchDashboardCount(localCount){
       const stats=document.getElementById('adminStats');
       if(stats&&!stats.innerHTML.trim()&&localCount){
@@ -464,10 +507,12 @@
         }
         if(message)message.textContent=descriptionOnly(message.textContent);
       });
+      patchRemoteDescriptions();
     }
     function renderLocalInquiries(){
       const tbody=document.getElementById('inquiryRows');
-      if(!tbody)return;
+      if(!tbody||patching)return;
+      patching=true;
       tbody.querySelectorAll('[data-local-inquiry]').forEach(row=>row.remove());
       const rows=localRows().filter(item=>!remoteInquiryExists(tbody,item));
       const empty=tbody.querySelector('td[colspan]');
@@ -476,11 +521,19 @@
       patchDashboardCount(rows.length);
       patchSourceLabels();
       window.lucide?.createIcons();
+      patching=false;
     }
     document.addEventListener('DOMContentLoaded',()=>{
       renderLocalInquiries();
+      loadRemoteInquiries();
       [600,1500,3000].forEach(delay=>setTimeout(renderLocalInquiries,delay));
-      document.getElementById('refreshInquiries')?.addEventListener('click',()=>setTimeout(renderLocalInquiries,400));
+      [800,1800,3200].forEach(delay=>setTimeout(loadRemoteInquiries,delay));
+      const tbody=document.getElementById('inquiryRows');
+      if(tbody){
+        const observer=new MutationObserver(()=>setTimeout(()=>{renderLocalInquiries();patchRemoteDescriptions();},80));
+        observer.observe(tbody,{childList:true});
+      }
+      document.getElementById('refreshInquiries')?.addEventListener('click',()=>setTimeout(()=>{loadRemoteInquiries();renderLocalInquiries();},500));
     });
   })();
   </script>

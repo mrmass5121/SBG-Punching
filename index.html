@@ -88,6 +88,10 @@ textarea:focus-visible{
   outline-offset:3px;
 }
 
+
+
+/* intro splash removed — permanently hidden by Lighthouse patch */
+
 /* ═══════════════════════════════════════
    MOBILE MENU
 ═══════════════════════════════════════ */
@@ -1494,7 +1498,7 @@ nav{display:flex;align-items:center;gap:4px}
   top: 16px;
   right: 70px;
 }
-
+/* .shop-buy-box removed: not used in any rendered template */
 .shop-related{
   margin-top:14px;
   padding:18px;
@@ -2096,6 +2100,40 @@ footer{
   min-width:18px;
 }
 
+
+/* ─── LIGHTHOUSE PERFORMANCE PATCH ───
+   Paint real content immediately, stop heavy mobile animations,
+   and reduce layout/animation work during first load. */
+#intro{display:none!important}
+.hero-badge,
+.hero-headline,
+.hero-sub,
+.hero-btns,
+.hero-scroll{
+  opacity:1!important;
+  transform:none!important;
+  animation:none!important;
+}
+@media(max-width:768px){
+  #heroCanvas,
+  .hero-scan,
+  .hero-glow-orb{display:none!important}
+  .hero-grid,
+  .stats-bar::before,
+  .ticker{animation:none!important}
+  header{backdrop-filter:none;-webkit-backdrop-filter:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+}
+
+/* ─── BELOW-FOLD RENDER PATCH ───
+   Keeps the same visual output, but lets Chromium skip work for sections
+   that are not near the viewport during first load. */
 @supports (content-visibility:auto){
   .clients-section,
   .about-section,
@@ -3288,6 +3326,8 @@ function mapProduction(row){
   };
 }
 
+// Public reads are protected by Supabase RLS. If config is not set, the
+// gallery stays empty until real production records are available.
 const PAGE_SIZE = 15;
 let galleryPage = 0;
 let galleryHasMore = true;
@@ -3807,32 +3847,51 @@ async function logQuoteClick(product){
   const last=Number(sessionStorage.getItem(key)||0);
   if(Date.now()-last<3000)return;
   sessionStorage.setItem(key,String(Date.now()));
-  /* ── Save to Supabase inquiries table so it appears in the admin Inquiries panel ── */
-  try{
-    const productImg=productImage(product);
-    const productUrl=currentProductUrl(product);
 
-    const msgLines=[
+  /* ── Save gallery inquiry so it appears in the admin Inquiries panel ──
+     The message embeds "Product URL:" and "Product Image:" lines which
+     admin.js already strips from the display cell and uses for the
+     Preview thumbnail + Link column.                                    */
+  try{
+    const productUrl=currentProductUrl(product);
+    const productImg=productImage(product);
+    const msg=[
       productMessageDetails(product),
       '',
       `Product URL: ${productUrl}`,
       productImg?`Product Image: ${productImg}`:'',
       'Contact details were not collected — gallery quote click.'
-    ].filter(line=>line!==null&&line!==undefined).join('\n').trim();
-    const inquiryData={
+    ].filter(l=>l!=null).join('\n').trim();
+
+    const payload={
       contact_name:'Gallery Visitor',
       company_name:'',
       phone:'',
       email:'',
       source:'production-gallery',
       service:product.name||'Production Item',
-      message:msgLines,
-      product_url:productUrl||''
+      message:msg,
+      product_url:productUrl||'',
+      captchaToken:''
     };
-    if(typeof sbgClient!=='undefined'&&sbgClient){
-      const{error}=await sbgClient.from('inquiries').insert([inquiryData]);
-      if(error)console.warn('Gallery inquiry insert error:',error.message);
+
+    /* Primary path: serverless endpoint uses a service-role key so it
+       bypasses Supabase RLS — same channel the contact form uses.      */
+    try{
+      await postJson(serverlessEndpoint('submit-inquiry'),payload);
+      return;
+    }catch(_){/* serverless unavailable – fall through to direct insert */}
+
+    /* Fallback: direct Supabase insert (works when anon INSERT is allowed).
+       Omit captchaToken and, if product_url column is missing, retry
+       without it — the URL is already embedded in the message.         */
+    if(!sbgClient)return;
+    const{captchaToken:_ct,product_url,...base}=payload;
+    let{error}=await sbgClient.from('inquiries').insert([{...base,product_url:productUrl}]);
+    if(error&&(error.code==='PGRST204'||/product_url/i.test(error.message||''))){
+      ({error}=await sbgClient.from('inquiries').insert([base]));
     }
+    if(error)console.warn('Gallery inquiry insert:',error.message);
   }catch(err){
     console.warn('Gallery inquiry track failed:',err);
   }

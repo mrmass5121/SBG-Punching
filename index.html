@@ -202,7 +202,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&family=Space+Mono:wght@400;700&display=swap"></noscript>
 <link rel="preload" href="css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="css/style.css"></noscript>
-<link rel="preload" as="image" href="img/sbg-logo.png" fetchpriority="high" type="image/png">
+<link rel="preload" as="image" href="img/sbg-logo.webp" fetchpriority="high" type="image/webp"><link rel="preload" as="image" href="img/sbg-logo.png" fetchpriority="high" type="image/png">
 <style>
 /* ═══════════════════════════════════════
    RESET & BASE
@@ -341,7 +341,7 @@ header.scrolled{
 .sbg-logo-fallback{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border:1px solid var(--border-green);border-radius:8px;background:rgba(0,200,83,.08);color:var(--green);font-family:var(--ff-display);font-size:1.25rem;letter-spacing:.12em;line-height:1;white-space:nowrap;}
 .logo .sbg-logo-fallback{height:44px;}
 footer .sbg-logo-fallback{height:48px;margin-bottom:12px;filter:brightness(1.1);}
-.sbg-logo-img{aspect-ratio:807/175;}
+.sbg-logo-img{aspect-ratio:404/88;}
 nav{display:flex;align-items:center;gap:4px}
 .nav-link{
   padding:8px 14px;border-radius:6px;font-size:.85rem;font-weight:500;
@@ -2570,7 +2570,10 @@ footer{
         <span></span><span></span><span></span>
       </button>
       <a href="#" class="logo">
-        <img class="sbg-logo-img" src="img/sbg-logo.png" width="807" height="175" loading="eager" decoding="async" fetchpriority="high" alt="SBG Groups Logo" style="height:44px;width:auto;display:block;">
+        <picture>
+          <source type="image/webp" srcset="img/sbg-logo.webp" width="404" height="88">
+          <img class="sbg-logo-img" src="img/sbg-logo.png" width="404" height="88" loading="eager" decoding="async" fetchpriority="high" alt="SBG Groups Logo" style="height:44px;width:auto;display:block;">
+        </picture>
       </a>
     </div>
     <nav aria-label="Primary navigation">
@@ -3452,7 +3455,19 @@ window.SBG_CONFIG=Object.assign({},window.SBG_CONFIG||{},{
   serverlessBaseUrl:(window.SBG_CONFIG&&window.SBG_CONFIG.serverlessBaseUrl)||'/api'
 });
 </script>
-<script src="/js/supabase.min.js" defer></script>
+<script>
+/* Load Supabase only if credentials are configured */
+(function(){
+  function hasVal(v){return Boolean(String(v||'').trim())&&!/^YOUR_/i.test(String(v||''));}
+  var cfg=window.SBG_CONFIG||{};
+  if(hasVal(cfg.supabaseUrl)&&hasVal(cfg.supabaseAnonKey)){
+    var s=document.createElement('script');
+    s.src='/js/supabase.min.js';
+    s.defer=true;
+    document.head.appendChild(s);
+  }
+})();
+</script>
 <script defer>
 
 /* ─── INTRO ───

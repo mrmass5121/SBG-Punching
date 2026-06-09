@@ -381,14 +381,6 @@
     const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     let remoteInquiries=[];
     let patching=false;
-    const localRows=()=>{
-      try{
-        const rows=JSON.parse(localStorage.getItem(key)||'[]');
-        return Array.isArray(rows)?rows:[];
-      }catch{
-        return [];
-      }
-    };
     const productUrl=item=>{
       const direct=String(item.product_url||'').trim();
       const match=String(item.message||'').match(/Product URL:\s*(https?:\/\/\S+)/i);
@@ -416,34 +408,6 @@
         .join(' ')
         .slice(0,260);
     };
-    const cleanMessage=item=>descriptionOnly(item.message);
-    const formatDate=value=>{
-      const date=new Date(value||Date.now());
-      return Number.isNaN(date.getTime())?'':date.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-    };
-    function localInquiryRow(item){
-      const url=productUrl(item);
-      const contact=[item.company_name,item.phone,item.email].filter(Boolean).map(esc).join('<br>');
-      return `<tr data-local-inquiry="${esc(item.id||'local')}">
-        <td>${previewCell(item)}</td>
-        <td><strong>${esc(item.contact_name||'Gallery Visitor')}</strong>${contact?`<br>${contact}`:''}</td>
-        <td>Production Gallery</td>
-        <td>${esc(item.service||'Production Item')}</td>
-        <td>${url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open Product</a>`:'<span class="readonly-note">-</span>'}</td>
-        <td>${esc(cleanMessage(item))}</td>
-        <td>${formatDate(item.created_at)}</td>
-        <td><span class="status-pill queued">${esc(item.status||'New')}</span></td>
-        <td><span class="readonly-note">Local</span></td>
-      </tr>`;
-    }
-    function remoteInquiryExists(tbody,item){
-      const needle=[item.phone,item.email,item.service].filter(Boolean).map(value=>String(value).toLowerCase());
-      if(needle.length<2)return false;
-      return [...tbody.querySelectorAll('tr:not([data-local-inquiry])')].some(row=>{
-        const text=row.textContent.toLowerCase();
-        return needle.every(value=>text.includes(value));
-      });
-    }
     function matchingRemoteInquiry(row){
       const contact=(row.children[1]?.textContent||'').toLowerCase();
       const service=(row.children[3]?.textContent||'').trim().toLowerCase();
@@ -485,19 +449,6 @@
         console.warn('Inquiry description patch failed:',error.message||error);
       }
     }
-    function patchDashboardCount(localCount){
-      const stats=document.getElementById('adminStats');
-      if(stats&&!stats.innerHTML.trim()&&localCount){
-        stats.innerHTML=`<div class="stat-card"><strong>${localCount}</strong><span>Inquiries</span></div>`;
-        return;
-      }
-      const card=[...(stats?.querySelectorAll('.stat-card')||[])].find(item=>/Inquiries/i.test(item.textContent));
-      const value=card?.querySelector('strong');
-      if(value){
-        if(!card.dataset.remoteValue)card.dataset.remoteValue=String(Number(value.textContent.replace(/\D/g,''))||0);
-        value.textContent=String((Number(card.dataset.remoteValue)||0)+localCount);
-      }
-    }
     function patchSourceLabels(){
       document.querySelectorAll('#inquiryRows tr').forEach(row=>{
         const source=row.children[2];
@@ -509,31 +460,27 @@
       });
       patchRemoteDescriptions();
     }
-    function renderLocalInquiries(){
+    function removeLocalInquiries(){
       const tbody=document.getElementById('inquiryRows');
       if(!tbody||patching)return;
       patching=true;
+      try{localStorage.removeItem(key);}catch(error){}
       tbody.querySelectorAll('[data-local-inquiry]').forEach(row=>row.remove());
-      const rows=localRows().filter(item=>!remoteInquiryExists(tbody,item));
-      const empty=tbody.querySelector('td[colspan]');
-      if(rows.length&&empty)tbody.innerHTML='';
-      if(rows.length)tbody.insertAdjacentHTML('afterbegin',rows.map(localInquiryRow).join(''));
-      patchDashboardCount(rows.length);
       patchSourceLabels();
       window.lucide?.createIcons();
       patching=false;
     }
     document.addEventListener('DOMContentLoaded',()=>{
-      renderLocalInquiries();
+      removeLocalInquiries();
       loadRemoteInquiries();
-      [600,1500,3000].forEach(delay=>setTimeout(renderLocalInquiries,delay));
+      [600,1500,3000].forEach(delay=>setTimeout(removeLocalInquiries,delay));
       [800,1800,3200].forEach(delay=>setTimeout(loadRemoteInquiries,delay));
       const tbody=document.getElementById('inquiryRows');
       if(tbody){
-        const observer=new MutationObserver(()=>setTimeout(()=>{renderLocalInquiries();patchRemoteDescriptions();},80));
+        const observer=new MutationObserver(()=>setTimeout(()=>{removeLocalInquiries();patchRemoteDescriptions();},80));
         observer.observe(tbody,{childList:true});
       }
-      document.getElementById('refreshInquiries')?.addEventListener('click',()=>setTimeout(()=>{loadRemoteInquiries();renderLocalInquiries();},500));
+      document.getElementById('refreshInquiries')?.addEventListener('click',()=>setTimeout(()=>{loadRemoteInquiries();removeLocalInquiries();},500));
     });
   })();
   </script>

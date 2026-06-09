@@ -215,7 +215,11 @@
 <link rel="dns-prefetch" href="//www.google.com">
 <link rel="dns-prefetch" href="//wa.me">
 <link rel="dns-prefetch" href="//challenges.cloudflare.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=block">
+<!-- Fonts: preconnect + async load — eliminates render-blocking -->
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap"></noscript>
 <link rel="preload" href="css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="css/style.css"></noscript>
 <link rel="preload" as="image" href="img/sbg-logo.webp" fetchpriority="high" type="image/webp">
@@ -238,9 +242,9 @@
   --text2:#b0bec5;
   --border:rgba(139,148,158,.12);
   --border-green:rgba(0,200,83,.25);
-  --ff-display:'Bebas Neue',sans-serif;
-  --ff-body:'DM Sans',sans-serif;
-  --ff-mono:'Space Mono',monospace;
+  --ff-display:'Bebas Neue','Arial Narrow',Arial,sans-serif;
+  --ff-body:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --ff-mono:'Space Mono','Courier New',Courier,monospace;
 }
 html{scroll-behavior:smooth;font-size:16px;overflow-x:hidden}
 body{

@@ -3887,11 +3887,36 @@ function mapProduction(row){
 const PAGE_SIZE = 15;
 let galleryPage = 0;
 let galleryHasMore = true;
+
+/* ── GALLERY CACHE (stale-while-revalidate) ── */
+const GALLERY_CACHE_KEY = 'sbg_gallery_v1';
+const GALLERY_CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+function saveGalleryCache(data){
+  try{
+    localStorage.setItem(GALLERY_CACHE_KEY,JSON.stringify({products:data,timestamp:Date.now()}));
+  }catch(e){}
+}
+function loadGalleryCache(){
+  try{
+    const raw=localStorage.getItem(GALLERY_CACHE_KEY);
+    if(!raw)return null;
+    const {products:cached,timestamp}=JSON.parse(raw);
+    if(Date.now()-timestamp>GALLERY_CACHE_TTL)return null;
+    return Array.isArray(cached)&&cached.length?cached:null;
+  }catch(e){return null;}
+}
 async function loadProducts(){
-  // Reset to page 0 on fresh load
   galleryPage = 0;
   galleryHasMore = true;
   products = [];
+
+  // Show cached data instantly — no waiting for Supabase
+  const cached = loadGalleryCache();
+  if(cached){
+    products = cached;
+    renderProducts(currentFilter);
+    updateLoadMoreButton();
+  }
 
   try{
     if(sbgClient){
@@ -3913,15 +3938,26 @@ async function loadProducts(){
       }
       if(error)throw error;
       const fetched=(data||[]).filter(row=>!REMOVED_PRODUCTION_IDS.has(row.id)).map(mapProduction);
-      products=fetched;
-      // If we got fewer than PAGE_SIZE, no more pages exist
       if(fetched.length < PAGE_SIZE) galleryHasMore=false;
+      // Save fresh data to cache
+      saveGalleryCache(fetched);
+      // Only re-render if data actually changed
+      const oldIds=products.map(p=>p.id).join(',');
+      const newIds=fetched.map(p=>p.id).join(',');
+      if(oldIds!==newIds){
+        products=fetched;
+        await loadReviews();
+        renderProducts(currentFilter);
+        updateLoadMoreButton();
+        openProductFromRoute();
+        return;
+      }
     }else{
       const res = await fetch('/products.json', { cache: 'default' });
       if(res.ok){
         const data=await res.json();
         if(data&&data.products&&data.products.length){
-          products=data.products.slice(0, PAGE_SIZE).map(p=>({
+          const fetched=data.products.slice(0, PAGE_SIZE).map(p=>({
             id:p.id||p.title,
             cat:p.category||'Production',
             name:p.title||'Production Item',
@@ -3940,16 +3976,20 @@ async function loadProducts(){
             date:p.date||null
           }));
           if(data.products.length <= PAGE_SIZE) galleryHasMore=false;
+          saveGalleryCache(fetched);
+          products=fetched;
         }
       }
     }
   }catch(error){
     console.warn('Gallery fallback active:',error.message||error);
   }
-  await loadReviews();
-  renderProducts(currentFilter);
-  updateLoadMoreButton();  // ? show/hide the button
-  openProductFromRoute();
+  if(!cached){
+    await loadReviews();
+    renderProducts(currentFilter);
+    updateLoadMoreButton();
+    openProductFromRoute();
+  }
 }
 
 // ── NEW FUNCTION: loads the next batch when user clicks "Load More" ──
@@ -4329,6 +4369,12 @@ function startNonCriticalHomepageWork(){
   registerProductRealtime();
   renderTurnstileWidgets(document);
 }
+// Render cached gallery immediately — before idle callback fires
+(function(){
+  const early=loadGalleryCache();
+  if(early&&early.length){products=early;renderProducts(currentFilter);}
+})();
+
 if('requestIdleCallback' in window){
   requestIdleCallback(startNonCriticalHomepageWork,{timeout:2500});
 }else{

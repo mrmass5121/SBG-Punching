@@ -1,4 +1,4 @@
-const CACHE_NAME = "sbg-punching-v18";
+const CACHE_NAME = "sbg-punching-v19";
 const APP_SHELL = [
   "css/admin.css",
   "js/admin.js",
@@ -15,10 +15,15 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
+  // Delete ALL old caches including v17, v18
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+    caches.keys().then(keys =>
+      Promise.all(keys.map(key => {
+        console.log("[SW] Deleting cache:", key);
+        return caches.delete(key);
+      }))
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
@@ -35,18 +40,21 @@ self.addEventListener("fetch", event => {
     url.pathname.endsWith("/js/speed-insights.js")
   ) return;
 
+  // NEVER cache HTML — always fetch fresh from network
   if (event.request.mode === "navigate" || event.request.headers.get("accept")?.includes("text/html")) {
     event.respondWith(
-      fetch(event.request, { cache: "no-store" }).catch(() => caches.match("/index.html"))
+      fetch(event.request, { cache: "no-store" })
+        .catch(() => caches.match("/index.html"))
     );
     return;
   }
 
+  // Cache-first for static assets (css, js, images)
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
       const copy = response.clone();
       caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
       return response;
-    }).catch(() => caches.match("index.html")))
+    }).catch(() => new Response("", { status: 408 })))
   );
 });

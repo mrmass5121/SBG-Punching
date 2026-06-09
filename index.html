@@ -212,65 +212,16 @@
 <link rel="canonical" href="https://sbgpunching.in/">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/fonts/bebas-neue-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/dm-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="//www.google.com">
 <link rel="dns-prefetch" href="//wa.me">
 <link rel="dns-prefetch" href="//challenges.cloudflare.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=block">
 <link rel="preload" href="css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="css/style.css"></noscript>
 <link rel="preload" as="image" href="img/sbg-logo.webp" fetchpriority="high" type="image/webp">
 <style>
-  /* ── SELF-HOSTED FONTS ── */
-@font-face {
-  font-family: 'Bebas Neue';
-  src: url('/fonts/bebas-neue-latin-400-normal.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'DM Sans';
-  src: url('/fonts/dm-sans-latin-400-normal.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'DM Sans';
-  src: url('/fonts/dm-sans-latin-500-normal.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'DM Sans';
-  src: url('/fonts/dm-sans-latin-700-normal.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'DM Sans';
-  src: url('/fonts/dm-sans-latin-800-normal.woff2') format('woff2');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Space Mono';
-  src: url('/fonts/space-mono-latin-400-normal.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Space Mono';
-  src: url('/fonts/space-mono-latin-700-normal.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
 /* ═══════════════════════════════════════
    RESET & BASE
 ═══════════════════════════════════════ */
@@ -484,9 +435,10 @@ nav{display:flex;align-items:center;gap:4px}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .hero-headline{
   font-family:var(--ff-display);
-  font-size:clamp(3.5rem,9vw,8.5rem);
+  font-size:clamp(3.5rem,8.5vw,8rem);
   line-height:.95;letter-spacing:.02em;
   margin-bottom:24px;
+  white-space:nowrap;
   opacity:0;animation:fadeUp .6s .1s forwards;
 }
 .hero-headline .line1{display:block;color:var(--text)}
@@ -2741,7 +2693,7 @@ footer{
     <div class="reveal-left">
       <span class="about-label">ABOUT S.B.G. PUNCHING</span>
       <h2 class="about-headline">Built on Precision.<br><span style="color:var(--green)">Trusted for Years.</span></h2>
-      <p class="about-desc">Established in Bangalore's Nadakerappa Industrial Estate, S.B.G. Punching has been the go-to precision metal works partner for industries across Karnataka for years. We combine CNC technology with hands-on craftsmanship to deliver sheet metal components that meet the tightest tolerances. From CNC punching and fiber laser cutting to press brake bending and bar bending work, we handle every process in-house. We proudly serve clients in Peenya, Sunkadakatte, Rajajinagar, Yeshwanthpur, Tumkur Road, and across Bangalore.</p>
+      <p class="about-desc">Established in Bangalore's Nadakerappa Industrial Estate, S.B.G. Punching has been the go-to precision metal works partner for industries across Karnataka for over 15 years. We combine CNC technology with hands-on craftsmanship to deliver sheet metal components that meet the tightest tolerances. From CNC punching and fiber laser cutting to press brake bending and bar bending work, we handle every process in-house. We proudly serve clients in Peenya, Sunkadakatte, Rajajinagar, Yeshwanthpur, Tumkur Road, and across Bangalore.</p>
       <div class="about-details">
         <div class="about-detail"><strong>PARTNER</strong><span>Ravi Kumar S.</span></div>
         <div class="about-detail"><strong>GSTIN</strong><span>29AEEFS7551L1ZD</span></div>

@@ -4224,7 +4224,7 @@ async function saveGalleryQuoteInquiry(product,details){
       console.warn('Gallery quote endpoint insert failed:',error.message||error);
     }
   }
-  saveLocalQuoteInquiry(payload);
+  console.warn('Gallery quote was not saved in admin because the live inquiry insert failed.');
   return false;
 }
 let activeQuoteProduct=null;

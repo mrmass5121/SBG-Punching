@@ -202,7 +202,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&family=Space+Mono:wght@400;700&display=swap"></noscript>
 <link rel="preload" href="css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="css/style.css"></noscript>
-<link rel="preload" as="image" href="img/sbg-logo.webp" fetchpriority="high" type="image/webp"><link rel="preload" as="image" href="img/sbg-logo.webp" fetchpriority="high" type="image/webp">
+<link rel="preload" as="image" href="img/sbg-logo.webp" fetchpriority="high" type="image/webp">
 <style>
 /* ═══════════════════════════════════════
    RESET & BASE
@@ -3391,7 +3391,10 @@ footer{
 <footer>
   <div class="footer-grid">
     <div>
-      <img class="sbg-logo-img" src="img/sbg-logo.png" width="807" height="175" loading="lazy" decoding="async" alt="SBG Groups Logo" style="height:48px;width:auto;margin-bottom:12px;filter:brightness(1.1);">
+      <picture>
+          <source type="image/webp" srcset="img/sbg-logo.webp" width="404" height="88">
+          <img class="sbg-logo-img" src="img/sbg-logo.png" width="404" height="88" loading="lazy" decoding="async" alt="SBG Groups Logo" style="height:48px;width:auto;margin-bottom:12px;filter:brightness(1.1);">
+        </picture>
       <div class="footer-tagline">PRECISION · QUALITY · TRUST</div>
       <p class="footer-desc">Bangalore's trusted CNC punching, laser cutting, bar bending and sheet metal fabrication specialists. Serving industries in Peenya, Sunkadakatte, Rajajinagar, Yeshwanthpur and across Karnataka.</p>
     </div>
@@ -3448,7 +3451,7 @@ footer{
   <a href="#contact" class="mob-cta-btn mob-cta-quote">Get Quote</a>
 </div>
 
-<script src="/js/config.js" defer></script>
+<script src="/js/config.js"></script>
 <script>
 window.SBG_CONFIG=Object.assign({},window.SBG_CONFIG||{},{
   turnstileSiteKey:(window.SBG_CONFIG&&window.SBG_CONFIG.turnstileSiteKey)||'0x4AAAAAADXr0G5pEekR28oa',
@@ -3456,15 +3459,21 @@ window.SBG_CONFIG=Object.assign({},window.SBG_CONFIG||{},{
 });
 </script>
 <script>
-/* Load Supabase only if credentials are configured */
+/* Load Supabase only if credentials are configured — runs after config.js */
 (function(){
   function hasVal(v){return Boolean(String(v||'').trim())&&!/^YOUR_/i.test(String(v||''));}
-  var cfg=window.SBG_CONFIG||{};
-  if(hasVal(cfg.supabaseUrl)&&hasVal(cfg.supabaseAnonKey)){
-    var s=document.createElement('script');
-    s.src='/js/supabase.min.js';
-    s.defer=true;
-    document.head.appendChild(s);
+  function tryLoad(){
+    var cfg=window.SBG_CONFIG||{};
+    if(hasVal(cfg.supabaseUrl)&&hasVal(cfg.supabaseAnonKey)){
+      var s=document.createElement('script');
+      s.src='/js/supabase.min.js';
+      document.head.appendChild(s);
+    }
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',tryLoad);
+  } else {
+    tryLoad();
   }
 })();
 </script>
@@ -4331,7 +4340,29 @@ document.getElementById('productionFilterPanel')?.addEventListener('click',event
   }
 });
 function startNonCriticalHomepageWork(){
-  loadProducts();
+  /* Wait for Supabase script to finish loading if it was injected */
+  function startApp(){
+    const SBG_CFG2=window.SBG_CONFIG||{};
+    function hasConfigValue2(v){const t=String(v||'').trim();return Boolean(t)&&!/^YOUR_/i.test(t)&&!/^[<>]/.test(t);}
+    const needsSupabase=hasConfigValue2(SBG_CFG2.supabaseUrl)&&hasConfigValue2(SBG_CFG2.supabaseAnonKey);
+    if(needsSupabase&&!window.supabase){
+      // Supabase script still loading, poll briefly
+      let tries=0;
+      const poll=setInterval(function(){
+        tries++;
+        if(window.supabase||tries>30){
+          clearInterval(poll);
+          if(window.supabase&&!sbgClient){
+            sbgClient=window.supabase.createClient(SBG_CFG2.supabaseUrl,SBG_CFG2.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+          }
+          loadProducts();
+        }
+      },100);
+    } else {
+      loadProducts();
+    }
+  }
+  startApp();
   registerProductRealtime();
   renderTurnstileWidgets(document);
 }

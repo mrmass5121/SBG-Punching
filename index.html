@@ -2524,7 +2524,6 @@ footer{
   .industries-section,
   .machines-section,
   .gallery-section,
-  #production,
   #contact,
   footer{
     content-visibility:auto;
@@ -3827,6 +3826,18 @@ function slugify(value){
 function productSlug(product){
   return product?.slug||slugify(`${product?.cat||'production'}-${product?.name||product?.id||'item'}`);
 }
+function normalizedProductImage(item,fallbackTitle){
+  if(!item)return null;
+  if(typeof item==='string'){
+    const src=safeUrl(item);
+    return src?{src,type:'image',alt:fallbackTitle||'Production item'}:null;
+  }
+  if(typeof item==='object'){
+    const src=safeUrl(item.src||item.url||item.image||'');
+    return src?{src,type:item.type||'image',alt:item.alt||fallbackTitle||'Production item'}:null;
+  }
+  return null;
+}
 function loadWishlistSlugs(){
   try{
     const values=JSON.parse(localStorage.getItem(WISHLIST_STORAGE_KEY)||'[]');
@@ -3854,7 +3865,10 @@ function isCustomisedDesignProduct(product){
   return /customi[sz]ed/.test(text)&&/design/.test(text);
 }
 function productMediaList(product){
-  if(Array.isArray(product?.images)&&product.images.length)return product.images;
+  if(Array.isArray(product?.images)&&product.images.length){
+    const images=product.images.map(item=>normalizedProductImage(item,product?.name||'Production item')).filter(Boolean);
+    if(images.length)return images;
+  }
   const single=safeUrl(product?.image);
   return single?[{src:single,type:'image',alt:product?.name||'Production item'}]:[];
 }
@@ -3918,13 +3932,34 @@ function saveGalleryCache(data){
     localStorage.setItem(GALLERY_CACHE_KEY,JSON.stringify({products:data,timestamp:Date.now()}));
   }catch(e){}
 }
+function normalizeCachedProduct(product){
+  if(!product||typeof product!=='object')return null;
+  const name=product.name||product.title||'Production Item';
+  const images=Array.isArray(product.images)
+    ? product.images.map(item=>normalizedProductImage(item,name)).filter(Boolean)
+    : [];
+  const image=safeUrl(product.image)||images[0]?.src||'';
+  return {
+    ...product,
+    id:product.id||product.title||name,
+    cat:product.cat||product.category||'Production',
+    name,
+    image,
+    images
+  };
+}
 function loadGalleryCache(){
   try{
     const raw=localStorage.getItem(GALLERY_CACHE_KEY);
     if(!raw)return null;
     const {products:cached,timestamp}=JSON.parse(raw);
     if(Date.now()-timestamp>GALLERY_CACHE_TTL)return null;
-    return Array.isArray(cached)&&cached.length?cached:null;
+    const normalized=Array.isArray(cached)?cached.map(normalizeCachedProduct).filter(Boolean):[];
+    if(!normalized.length){
+      localStorage.removeItem(GALLERY_CACHE_KEY);
+      return null;
+    }
+    return normalized;
   }catch(e){return null;}
 }
 async function loadProducts(){
@@ -3963,17 +3998,12 @@ async function loadProducts(){
       if(fetched.length < PAGE_SIZE) galleryHasMore=false;
       // Save fresh data to cache
       saveGalleryCache(fetched);
-      // Only re-render if data actually changed
-      const oldIds=products.map(p=>p.id).join(',');
-      const newIds=fetched.map(p=>p.id).join(',');
-      if(oldIds!==newIds){
-        products=fetched;
-        await loadReviews();
-        renderProducts(currentFilter);
-        updateLoadMoreButton();
-        openProductFromRoute();
-        return;
-      }
+      products=fetched;
+      await loadReviews();
+      renderProducts(currentFilter);
+      updateLoadMoreButton();
+      openProductFromRoute();
+      return;
     }else{
       const res = await fetch('/products.json', { cache: 'default' });
       if(res.ok){
@@ -3994,12 +4024,17 @@ async function loadProducts(){
             features:Array.isArray(p.features)?p.features:(Array.isArray(p.tags)?p.tags:[]),
             icon:'📧',
             image:safeUrl(p.image),
-            images:Array.isArray(p.images)?p.images.map(src=>({src:safeUrl(src),type:'image',alt:p.title||'Production item'})).filter(item=>item.src):[],
+            images:Array.isArray(p.images)?p.images.map(item=>normalizedProductImage(item,p.title||'Production item')).filter(Boolean):[],
             date:p.date||null
           }));
           if(data.products.length <= PAGE_SIZE) galleryHasMore=false;
           saveGalleryCache(fetched);
           products=fetched;
+          await loadReviews();
+          renderProducts(currentFilter);
+          updateLoadMoreButton();
+          openProductFromRoute();
+          return;
         }
       }
     }
@@ -4121,7 +4156,8 @@ async function loadReviews(){
   },{});
 }
 function reviewsFor(product){
-  return productReviews[productReviewKey(product)]||[];
+  const rows=productReviews[productReviewKey(product)];
+  return Array.isArray(rows)?rows:[];
 }
 function reviewStats(product){
   const rows=reviewsFor(product);
@@ -4214,6 +4250,14 @@ function clearProductionFilters(){
 function productGlobalIndex(product){
   return Math.max(0,products.findIndex(item=>item.name===product.name&&item.cat===product.cat));
 }
+function safeProductQuoteUrl(product){
+  try{
+    return productEnquiryUrl(product);
+  }catch(error){
+    console.warn('Product quote URL failed:',error.message||error);
+    return '#contact';
+  }
+}
 function productRecommendedCard(product,index){
   const productIndex=productGlobalIndex(product);
   const image=productImage(product);
@@ -4223,9 +4267,10 @@ function productRecommendedCard(product,index){
   const ratingLabel=stats.count?`${starText(stats.average)} ${stats.average.toFixed(1)} (${stats.count})`:'&#9734;&#9734;&#9734;&#9734;&#9734; No ratings';
   const slug=productSlug(product);
   const saved=isWishlisted(product);
+  const quoteUrl=escHTML(safeProductQuoteUrl(product));
   return `<article class="amazon-product-card amazon-rec-card" data-product-index="${productIndex}" role="button" tabindex="0" aria-label="View ${name}">
     <div class="amazon-card-media">
-      <a class="amazon-card-image" href="#production" data-product-link aria-label="Open details for ${name}">${image?`<img src="${image}" alt="${name}" loading="lazy" decoding="async" width="400" height="210" style="width:100%;height:100%;object-fit:cover;">`:escHTML(product.icon||'??')}</a>
+      <a class="amazon-card-image" href="#production" data-product-link aria-label="Open details for ${name}">${image?`<img src="${escHTML(image)}" alt="${name}" loading="lazy" decoding="async" width="400" height="210" style="width:100%;height:100%;object-fit:cover;">`:escHTML(product.icon||'??')}</a>
       <button class="product-full-view" type="button" data-full-view="${productIndex}" aria-label="Full view ${name}" title="Full view">${fullViewIcon()}</button>
     </div>
     <span class="amazon-quote">Quote after drawing review</span>
@@ -4233,12 +4278,31 @@ function productRecommendedCard(product,index){
     <div class="prod-mat">${mat}</div>
     <span class="amazon-stars">${ratingLabel}</span>
     <div class="product-card-actions">
-      <a class="product-card-action product-quote-action" href="${productEnquiryUrl(product)}" target="_blank" rel="noopener noreferrer">Request Quote</a>
-      <button class="product-card-action ${saved?'active':''}" type="button" data-toggle-wishlist="${productIndex}" data-wishlist-slug="${slug}" aria-pressed="${saved?'true':'false'}"><span data-wishlist-label>${saved?'Wishlisted':'Wishlist'}</span></button>
+      <a class="product-card-action product-quote-action" href="${quoteUrl}" target="_blank" rel="noopener noreferrer">Request Quote</a>
+      <button class="product-card-action ${saved?'active':''}" type="button" data-toggle-wishlist="${productIndex}" data-wishlist-slug="${escHTML(slug)}" aria-pressed="${saved?'true':'false'}"><span data-wishlist-label>${saved?'Wishlisted':'Wishlist'}</span></button>
       <button class="product-card-action product-share-action" type="button" data-share-product="${productIndex}">Share</button>
       <button class="product-review-cta" type="button" data-open-reviews="${productIndex}">Rate &amp; Review</button>
     </div>
   </article>`;
+}
+function safeProductRecommendedCard(product,index){
+  try{
+    return productRecommendedCard(product,index);
+  }catch(error){
+    console.warn('Product card render failed:',error.message||error,product);
+    const productIndex=productGlobalIndex(product);
+    const name=escHTML(product?.name||'Production Item');
+    const mat=escHTML(product?.mat||product?.material||'Custom material');
+    return `<article class="amazon-product-card amazon-rec-card" data-product-index="${productIndex}" role="button" tabindex="0" aria-label="View ${name}">
+      <a class="amazon-card-image" href="#production" data-product-link aria-label="Open details for ${name}">${escHTML(product?.icon||'Production')}</a>
+      <span class="amazon-quote">Quote after drawing review</span>
+      <a class="amazon-product-title" href="#production" data-product-link>${name}</a>
+      <div class="prod-mat">${mat}</div>
+      <div class="product-card-actions">
+        <a class="product-card-action product-quote-action" href="${escHTML(safeProductQuoteUrl(product))}" target="_blank" rel="noopener noreferrer">Request Quote</a>
+      </div>
+    </article>`;
+  }
 }
 function featuredCollectionProducts(){
   return products.filter(product=>product.featured);
@@ -4340,7 +4404,7 @@ function renderProducts(filter){
     recommendedGrid.innerHTML='';
   }else if(recommendedGrid){
     recommendedGrid.innerHTML=filtered.length
-      ? filtered.map(productRecommendedCard).join('')
+      ? filtered.map(safeProductRecommendedCard).join('')
       : `<div class="empty-gallery-note">${
           productSearchQuery||currentFilter!=='All'||currentMaterialFilter!=='All'
             ? 'No productions match your search or filters.'
@@ -4393,8 +4457,13 @@ function startNonCriticalHomepageWork(){
 }
 // Render cached gallery immediately — before idle callback fires
 (function(){
-  const early=loadGalleryCache();
-  if(early&&early.length){products=early;renderProducts(currentFilter);}
+  try{
+    const early=loadGalleryCache();
+    if(early&&early.length){products=early;renderProducts(currentFilter);}
+  }catch(error){
+    console.warn('Cached gallery render failed:',error.message||error);
+    try{localStorage.removeItem(GALLERY_CACHE_KEY);}catch(e){}
+  }
 })();
 
 if('requestIdleCallback' in window){

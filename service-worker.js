@@ -1,4 +1,4 @@
-const CACHE_NAME = "sbg-punching-v17";
+const CACHE_NAME = "sbg-punching-v18";
 const APP_SHELL = [
   "css/admin.css",
   "js/admin.js",
@@ -37,11 +37,7 @@ self.addEventListener("fetch", event => {
 
   if (event.request.mode === "navigate" || event.request.headers.get("accept")?.includes("text/html")) {
     event.respondWith(
-      fetch(event.request).then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        return response;
-      }).catch(() => caches.match(event.request).then(cached => cached || caches.match("index.html")))
+      fetch(event.request, { cache: "no-store" }).catch(() => caches.match("/index.html"))
     );
     return;
   }

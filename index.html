@@ -278,11 +278,39 @@
 <link rel="dns-prefetch" href="//www.google.com">
 <link rel="dns-prefetch" href="//wa.me">
 <link rel="dns-prefetch" href="//challenges.cloudflare.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap">
 <link rel="preload" href="css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="css/style.css"></noscript>
 <link rel="preload" as="image" href="img/sbg-logo.png" fetchpriority="high" type="image/png">
 <style>
+/* ═══════════════════════════════════════
+   FONT FALLBACK OVERRIDES (reduce CLS on font swap)
+═══════════════════════════════════════ */
+@font-face{
+  font-family:'DM Sans Fallback';
+  src:local('Arial');
+  ascent-override:94%;
+  descent-override:24%;
+  line-gap-override:0%;
+  size-adjust:100%;
+}
+@font-face{
+  font-family:'Bebas Neue Fallback';
+  src:local('Arial Narrow'),local('Impact'),local('Arial');
+  ascent-override:87%;
+  descent-override:14%;
+  line-gap-override:0%;
+  size-adjust:108%;
+}
+@font-face{
+  font-family:'Space Mono Fallback';
+  src:local('Courier New'),local('Courier');
+  ascent-override:91%;
+  descent-override:23%;
+  line-gap-override:0%;
+  size-adjust:95%;
+}
+
 /* ═══════════════════════════════════════
    RESET & BASE
 ═══════════════════════════════════════ */
@@ -301,9 +329,9 @@
   --text2:#b0bec5;
   --border:rgba(139,148,158,.12);
   --border-green:rgba(0,200,83,.25);
-  --ff-display:'Bebas Neue',sans-serif;
-  --ff-body:'DM Sans',sans-serif;
-  --ff-mono:'Space Mono',monospace;
+  --ff-display:'Bebas Neue','Bebas Neue Fallback',sans-serif;
+  --ff-body:'DM Sans','DM Sans Fallback',sans-serif;
+  --ff-mono:'Space Mono','Space Mono Fallback',monospace;
 }
 html{scroll-behavior:smooth;font-size:16px;overflow-x:hidden}
 body{
@@ -416,6 +444,7 @@ header.scrolled{
 .sbg-logo-fallback{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border:1px solid var(--border-green);border-radius:8px;background:rgba(0,200,83,.08);color:var(--green);font-family:var(--ff-display);font-size:1.25rem;letter-spacing:.12em;line-height:1;white-space:nowrap;}
 .logo .sbg-logo-fallback{height:44px;}
 footer .sbg-logo-fallback{height:48px;margin-bottom:12px;filter:brightness(1.1);}
+.sbg-logo-img{aspect-ratio:807/175;height:auto;}
 nav{display:flex;align-items:center;gap:4px}
 .nav-link{
   padding:8px 14px;border-radius:6px;font-size:.85rem;font-weight:500;
@@ -499,7 +528,10 @@ nav{display:flex;align-items:center;gap:4px}
   font-size:clamp(3.5rem,9vw,8.5rem);
   line-height:.95;letter-spacing:.02em;
   margin-bottom:24px;
-  opacity:0;animation:fadeUp .6s .1s forwards;
+  animation:fadeUp .6s .1s both;
+}
+@media (prefers-reduced-motion:no-preference){
+  .hero-headline{opacity:0;animation:fadeUp .6s .1s forwards;}
 }
 .hero-headline .line1{display:block;color:var(--text)}
 .hero-headline .line2{
@@ -3560,7 +3592,7 @@ function closeMobileMenu(){
 }
 
 /* ─── HERO PARTICLES ─── */
-(function(){
+(window.requestIdleCallback||setTimeout)(function(){(function(){
   const canvas=document.getElementById('heroCanvas');
   if(!canvas)return;
   if(window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -3636,7 +3668,7 @@ for(let i=0;i<particleCount;i++)particles.push(new Particle());
     requestAnimationFrame(loop);
   }
   loop();
-})();
+})();},{timeout:2000});
 
 /* ─── SCROLL REVEAL ─── */
 const revealObs=new IntersectionObserver(entries=>{

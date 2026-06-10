@@ -40,6 +40,7 @@
 <link rel="dns-prefetch" href="//wa.me">
 <link rel="dns-prefetch" href="//challenges.cloudflare.com">
 <link rel="dns-prefetch" href="//supabase.co">
+<link rel="prefetch" href="/js/supabase.min.js" as="script">
 <link rel="preload" href="https://sbgpunching.in/img/og-image.jpg" as="image" fetchpriority="low">
 <link rel="preload" href="fonts/bebas-neue-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
 <link rel="preload" href="fonts/dm-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
@@ -4738,11 +4739,31 @@ function renderTurnstileNearForms(){
   nodes.forEach(node=>observer.observe(node));
 }
 
-if('requestIdleCallback' in window){
-  requestIdleCallback(startNonCriticalHomepageWork,{timeout:5000});
-}else{
-  window.addEventListener('load',()=>setTimeout(startNonCriticalHomepageWork,1600),{once:true});
-}
+/* Load Supabase & gallery only when user scrolls near the production section,
+   or after 6s idle — whichever comes first. This avoids loading 51 KiB of
+   supabase.min.js on initial page load, removing it from the critical path. */
+(function(){
+  let started=false;
+  function start(){
+    if(started)return;
+    started=true;
+    if('requestIdleCallback' in window){
+      requestIdleCallback(startNonCriticalHomepageWork,{timeout:3000});
+    }else{
+      startNonCriticalHomepageWork();
+    }
+  }
+  /* Trigger when gallery section is 200px away from viewport */
+  const gallerySection=document.getElementById('production');
+  if(gallerySection&&'IntersectionObserver' in window){
+    const obs=new IntersectionObserver(entries=>{
+      if(entries[0].isIntersecting){obs.disconnect();start();}
+    },{rootMargin:'200px 0px',threshold:0});
+    obs.observe(gallerySection);
+  }
+  /* Safety fallback: start after 6s regardless */
+  window.addEventListener('load',()=>setTimeout(start,6000),{once:true});
+})();
 /* ─── PRODUCTION DETAIL MODAL ─── */
 let lbProducts=[],lbIndex=0,lbImageIndex=0;
 function closeLightbox(){

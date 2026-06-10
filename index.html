@@ -329,6 +329,7 @@ nav{display:flex;align-items:center;gap:4px}
   font-family:var(--ff-display);font-size:clamp(2rem,4vw,3.5rem);
   line-height:1;color:var(--green);
   text-shadow:0 0 20px var(--glow);letter-spacing:.04em;
+  display:inline-block;min-width:4ch;
 }
 .stat-label{
   font-family:var(--ff-mono);font-size:.65rem;
@@ -522,14 +523,12 @@ nav{display:flex;align-items:center;gap:4px}
   animation:none!important;
 }
 .hero-grid,
-.stats-bar::before,
-.ticker{
+.stats-bar::before{
   animation:none!important;
 }
 @media(max-width:768px){
   .hero-grid,
-  .stats-bar::before,
-  .ticker{animation:none!important}
+  .stats-bar::before{animation:none!important}
   header{backdrop-filter:none;-webkit-backdrop-filter:none}
 }
 @media(prefers-reduced-motion:reduce){
@@ -669,27 +668,27 @@ nav{display:flex;align-items:center;gap:4px}
 <div class="stats-bar">
   <div class="stats-inner">
     <div class="stat-item">
-      <div class="stat-num" data-target="15" data-suffix="+">15+</div>
+      <div class="stat-num" data-target="15" data-suffix="+">0+</div>
       <div class="stat-label">Years Experience</div>
     </div>
     <div class="stat-divider"></div>
     <div class="stat-item">
-      <div class="stat-num" data-target="50" data-suffix="K+">50K+</div>
+      <div class="stat-num" data-target="50" data-suffix="K+">0K+</div>
       <div class="stat-label">Projects Done</div>
     </div>
     <div class="stat-divider"></div>
     <div class="stat-item">
-      <div class="stat-num" data-target="200" data-suffix="+">200+</div>
+      <div class="stat-num" data-target="200" data-suffix="+">0+</div>
       <div class="stat-label">Happy Clients</div>
     </div>
     <div class="stat-divider"></div>
     <div class="stat-item">
-      <div class="stat-num" data-target="6" data-suffix="">6</div>
+      <div class="stat-num" data-target="6" data-suffix="">0</div>
       <div class="stat-label">Core Services</div>
     </div>
     <div class="stat-divider"></div>
     <div class="stat-item">
-      <div class="stat-num" data-target="100" data-suffix="%">100%</div>
+      <div class="stat-num" data-target="100" data-suffix="%">0%</div>
       <div class="stat-label">Quality Assured</div>
     </div>
   </div>
@@ -981,6 +980,7 @@ nav{display:flex;align-items:center;gap:4px}
   font-family:var(--ff-display);font-size:clamp(2rem,4vw,3.5rem);
   line-height:1;color:var(--green);
   text-shadow:0 0 20px var(--glow);letter-spacing:.04em;
+  display:inline-block;min-width:4ch;
 }
 .stat-label{
   font-family:var(--ff-mono);font-size:.65rem;
@@ -1033,7 +1033,8 @@ nav{display:flex;align-items:center;gap:4px}
 }
 .ticker-wrap::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
 .ticker-wrap::after{right:0;background:linear-gradient(-90deg,var(--bg),transparent)}
-.ticker{display:flex;gap:0;animation:ticker 30s linear infinite;width:max-content}
+.ticker{display:flex;gap:0;animation:ticker 26s linear infinite;width:max-content;will-change:transform}
+.ticker-group{display:flex;flex:0 0 auto}
 .ticker-item{
   display:flex;align-items:center;justify-content:center;
   padding:12px 40px;font-family:var(--ff-display);
@@ -2894,14 +2895,12 @@ footer{
   animation:none!important;
 }
 .hero-grid,
-.stats-bar::before,
-.ticker{
+.stats-bar::before{
   animation:none!important;
 }
 @media(max-width:768px){
   .hero-grid,
-  .stats-bar::before,
-  .ticker{animation:none!important}
+  .stats-bar::before{animation:none!important}
   header{backdrop-filter:none;-webkit-backdrop-filter:none}
 }
 @media(prefers-reduced-motion:reduce){
@@ -2978,15 +2977,27 @@ footer{
 <section class="clients-section">
   <div class="clients-label">TRUSTED BY INDUSTRIES ACROSS BANGALORE & BEYOND</div>
   <div class="ticker-wrap">
-    <div class="ticker" id="ticker">
-      <div class="ticker-item">ELECTRICAL & ELECTRONICS</div>
-      <div class="ticker-item">AUTOMOTIVE & ENGINEERING</div>
-      <div class="ticker-item">HVAC & VENTILATION</div>
-      <div class="ticker-item">TELECOM & IT</div>
-      <div class="ticker-item">CONSTRUCTION</div>
-      <div class="ticker-item">FOOD & PHARMA</div>
-      <div class="ticker-item">AUTOMATION OEM</div>
-      <div class="ticker-item">INDUSTRIAL MACHINERY</div>
+    <div class="ticker" id="ticker" aria-label="Industries served">
+      <div class="ticker-group">
+        <div class="ticker-item">ELECTRICAL & ELECTRONICS</div>
+        <div class="ticker-item">AUTOMOTIVE & ENGINEERING</div>
+        <div class="ticker-item">HVAC & VENTILATION</div>
+        <div class="ticker-item">TELECOM & IT</div>
+        <div class="ticker-item">CONSTRUCTION</div>
+        <div class="ticker-item">FOOD & PHARMA</div>
+        <div class="ticker-item">AUTOMATION OEM</div>
+        <div class="ticker-item">INDUSTRIAL MACHINERY</div>
+      </div>
+      <div class="ticker-group" aria-hidden="true">
+        <div class="ticker-item">ELECTRICAL & ELECTRONICS</div>
+        <div class="ticker-item">AUTOMOTIVE & ENGINEERING</div>
+        <div class="ticker-item">HVAC & VENTILATION</div>
+        <div class="ticker-item">TELECOM & IT</div>
+        <div class="ticker-item">CONSTRUCTION</div>
+        <div class="ticker-item">FOOD & PHARMA</div>
+        <div class="ticker-item">AUTOMATION OEM</div>
+        <div class="ticker-item">INDUSTRIAL MACHINERY</div>
+      </div>
     </div>
   </div>
 </section>
@@ -3832,18 +3843,27 @@ document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el=>reve
 
 /* ─── ANIMATED COUNTERS ─── */
 function animateCounters(){
+  const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('.stat-num[data-target]').forEach(el=>{
-    const target=parseInt(el.dataset.target);
+    if(el.dataset.counted==='true')return;
+    el.dataset.counted='true';
+    const target=Number(el.dataset.target)||0;
     const suffix=el.dataset.suffix||'';
-    const finalText=`${target}${suffix}`;
-    if(el.textContent.trim()===finalText)return;
-    let current=0;
-    const step=Math.ceil(target/60);
-    const timer=setInterval(()=>{
-      current=Math.min(current+step,target);
-      el.textContent=current+suffix;
-      if(current>=target)clearInterval(timer);
-    },25);
+    const setValue=value=>{el.textContent=`${value}${suffix}`};
+    if(reduceMotion){
+      setValue(target);
+      return;
+    }
+    const duration=1500;
+    const start=performance.now();
+    setValue(0);
+    const tick=now=>{
+      const progress=Math.min((now-start)/duration,1);
+      const eased=1-Math.pow(1-progress,3);
+      setValue(Math.round(target*eased));
+      if(progress<1)requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   });
 }
 const statsObs=new IntersectionObserver(entries=>{

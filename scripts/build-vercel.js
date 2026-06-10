@@ -11,6 +11,7 @@ const dirsToCopy = [
   "cnc-punching",
   "control-panel-enclosures",
   "css",
+  "fonts",
   "img",
   "js",
   "laser-cutting",

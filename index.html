@@ -29,11 +29,8 @@
 <link rel="dns-prefetch" href="//www.google.com">
 <link rel="dns-prefetch" href="//wa.me">
 <link rel="dns-prefetch" href="//challenges.cloudflare.com">
-<!-- Critical CSS is inlined below; optional deploy assets stay off the first paint path. -->
 <style id="criticalStyles">
-/* ═══════════════════════════════════════
-   RESET & BASE
-═══════════════════════════════════════ */
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0b0f14;
@@ -49,9 +46,9 @@
   --text2:#b0bec5;
   --border:rgba(139,148,158,.12);
   --border-green:rgba(0,200,83,.25);
-  --ff-display:Impact,'Arial Narrow','Arial Black',Arial,sans-serif;
-  --ff-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
-  --ff-mono:'SFMono-Regular',Consolas,'Liberation Mono','Courier New',monospace;
+  --ff-display:'Bebas Neue',Impact,'Arial Narrow','Arial Black',Arial,sans-serif;
+  --ff-body:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  --ff-mono:'Space Mono','SFMono-Regular',Consolas,'Liberation Mono','Courier New',monospace;
 }
 html{scroll-behavior:smooth;font-size:16px;overflow-x:hidden}
 body{
@@ -83,12 +80,6 @@ textarea:focus-visible{
 }
 
 
-
-/* intro splash removed — permanently hidden by Lighthouse patch */
-
-/* ═══════════════════════════════════════
-   MOBILE MENU
-═══════════════════════════════════════ */
 #mobileOverlay{
   display:none;position:fixed;inset:0;
   background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
@@ -127,9 +118,6 @@ textarea:focus-visible{
   color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;
 }
 
-/* ═══════════════════════════════════════
-   HEADER
-═══════════════════════════════════════ */
 header{
   position:fixed;top:0;left:0;right:0;z-index:900;
   padding:0 24px;height:70px;
@@ -187,9 +175,7 @@ nav{display:flex;align-items:center;gap:4px}
 }
 .btn-quote-header:hover{background:var(--glow2);box-shadow:0 0 20px var(--glow)}
 
-/* ═══════════════════════════════════════
-   HERO
-═══════════════════════════════════════ */
+
 .hero{
   position:relative;min-height:100svh;
   display:flex;align-items:center;justify-content:center;
@@ -324,9 +310,6 @@ nav{display:flex;align-items:center;gap:4px}
 @keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 
-/* ═══════════════════════════════════════
-   STATS BAR
-═══════════════════════════════════════ */
 .stats-bar{
   background:var(--card);border-top:1px solid var(--border);
   border-bottom:1px solid var(--border);
@@ -355,11 +338,6 @@ nav{display:flex;align-items:center;gap:4px}
 }
 .stat-divider{width:1px;height:50px;background:var(--border)}
 
-/* ═══════════════════════════════════════
-   SECTION COMMONS
-═══════════════════════════════════════ */
-
-
 .wa-float{
   position:fixed;bottom:28px;right:28px;z-index:800;
   width:58px;height:58px;border-radius:50%;
@@ -373,9 +351,6 @@ nav{display:flex;align-items:center;gap:4px}
 @keyframes waPulse{0%,100%{box-shadow:0 4px 20px rgba(37,211,102,.5),0 0 0 0 rgba(37,211,102,.4)}50%{box-shadow:0 4px 20px rgba(37,211,102,.5),0 0 0 14px rgba(37,211,102,0)}}
 .wa-icon{width:30px;height:30px}
 
-/* ═══════════════════════════════════════
-   MOBILE CTA BAR
-═══════════════════════════════════════ */
 .mobile-cta{
   display:none;
   position:fixed;bottom:0;left:0;right:0;z-index:700;
@@ -394,10 +369,6 @@ nav{display:flex;align-items:center;gap:4px}
 .mob-cta-wa:hover{background:#1ebc59}
 .mob-cta-quote{background:var(--green);color:#000;font-weight:700;border-left:1px solid rgba(0,200,83,.3)}
 .mob-cta-quote:hover{background:var(--green2)}
-
-/* ═══════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════ */
 
 
 @media(max-width:1100px){
@@ -542,11 +513,6 @@ nav{display:flex;align-items:center;gap:4px}
 }
 
 
-/* ─── LIGHTHOUSE PERFORMANCE PATCH ───
-   Paint real content immediately, stop heavy mobile animations,
-   and reduce layout/animation work during first load. */
-
-
 #intro{display:none!important}
 .hero-badge,
 .hero-headline,
@@ -583,9 +549,6 @@ nav{display:flex;align-items:center;gap:4px}
   }
 }
 
-/* ─── BELOW-FOLD RENDER PATCH ───
-   Keeps the same visual output, but lets Chromium skip work for sections
-   that are not near the viewport during first load. */
 @supports (content-visibility:auto){
   .section,
   .clients-section,
@@ -610,7 +573,6 @@ nav{display:flex;align-items:center;gap:4px}
     contain-intrinsic-size:1px 720px;
   }
 }
-/* ─── GALLERY CRITICAL CSS (inline to prevent flash on mobile) ─── */
 
 </style>
 </head>
@@ -629,8 +591,6 @@ nav{display:flex;align-items:center;gap:4px}
   </div>
 </noscript>
 <a class="skip-link" href="#mainContent">Skip to content</a>
-
-<!-- intro splash removed (permanently hidden) -->
 
 <!-- MOBILE MENU -->
 <div id="mobileOverlay" onclick="closeMobileMenu()" hidden aria-hidden="true"></div>
@@ -750,9 +710,7 @@ nav{display:flex;align-items:center;gap:4px}
 
 
 <style id="deferredStyles" media="print">
-/* ═══════════════════════════════════════
-   RESET & BASE
-═══════════════════════════════════════ */
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0b0f14;
@@ -768,9 +726,9 @@ nav{display:flex;align-items:center;gap:4px}
   --text2:#b0bec5;
   --border:rgba(139,148,158,.12);
   --border-green:rgba(0,200,83,.25);
-  --ff-display:Impact,'Arial Narrow','Arial Black',Arial,sans-serif;
-  --ff-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
-  --ff-mono:'SFMono-Regular',Consolas,'Liberation Mono','Courier New',monospace;
+  --ff-display:'Bebas Neue',Impact,'Arial Narrow','Arial Black',Arial,sans-serif;
+  --ff-body:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  --ff-mono:'Space Mono','SFMono-Regular',Consolas,'Liberation Mono','Courier New',monospace;
 }
 html{scroll-behavior:smooth;font-size:16px;overflow-x:hidden}
 body{
@@ -801,13 +759,6 @@ textarea:focus-visible{
   outline-offset:3px;
 }
 
-
-
-/* intro splash removed — permanently hidden by Lighthouse patch */
-
-/* ═══════════════════════════════════════
-   MOBILE MENU
-═══════════════════════════════════════ */
 #mobileOverlay{
   display:none;position:fixed;inset:0;
   background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
@@ -846,9 +797,7 @@ textarea:focus-visible{
   color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;
 }
 
-/* ═══════════════════════════════════════
-   HEADER
-═══════════════════════════════════════ */
+
 header{
   position:fixed;top:0;left:0;right:0;z-index:900;
   padding:0 24px;height:70px;
@@ -906,9 +855,7 @@ nav{display:flex;align-items:center;gap:4px}
 }
 .btn-quote-header:hover{background:var(--glow2);box-shadow:0 0 20px var(--glow)}
 
-/* ═══════════════════════════════════════
-   HERO
-═══════════════════════════════════════ */
+
 .hero{
   position:relative;min-height:100svh;
   display:flex;align-items:center;justify-content:center;
@@ -1043,9 +990,7 @@ nav{display:flex;align-items:center;gap:4px}
 @keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 
-/* ═══════════════════════════════════════
-   STATS BAR
-═══════════════════════════════════════ */
+
 .stats-bar{
   background:var(--card);border-top:1px solid var(--border);
   border-bottom:1px solid var(--border);
@@ -1074,9 +1019,6 @@ nav{display:flex;align-items:center;gap:4px}
 }
 .stat-divider{width:1px;height:50px;background:var(--border)}
 
-/* ═══════════════════════════════════════
-   SECTION COMMONS
-═══════════════════════════════════════ */
 .section{padding:100px 24px}
 .section-inner{max-width:1280px;margin:0 auto}
 .section-head{text-align:center;margin-bottom:64px;width:100%;display:flex;flex-direction:column;align-items:center;}
@@ -1105,9 +1047,7 @@ nav{display:flex;align-items:center;gap:4px}
 .reveal-right{opacity:0;transform:translateX(40px);transition:opacity .7s ease,transform .7s ease}
 .reveal-right.visible{opacity:1;transform:translateX(0)}
 
-/* ═══════════════════════════════════════
-   CLIENTS
-═══════════════════════════════════════ */
+
 .clients-section{
   padding:48px 0;
   border-top:1px solid var(--border);
@@ -1135,9 +1075,7 @@ nav{display:flex;align-items:center;gap:4px}
 .ticker-item:hover{color:var(--green)}
 @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
-/* ═══════════════════════════════════════
-   ABOUT / COMPANY
-═══════════════════════════════════════ */
+
 .about-section{padding:100px 24px;background:var(--bg2)}
 .about-grid{
   max-width:1280px;margin:0 auto;
@@ -1190,9 +1128,7 @@ nav{display:flex;align-items:center;gap:4px}
 }
 .about-spec-key{font-size:.7rem;color:var(--steel);letter-spacing:.15em;margin-top:4px}
 
-/* ═══════════════════════════════════════
-   SERVICES
-═══════════════════════════════════════ */
+
 .services-grid{
   display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
 }
@@ -1260,9 +1196,6 @@ nav{display:flex;align-items:center;gap:4px}
 }
 .svc-more:hover{color:var(--green)}
 
-/* ═══════════════════════════════════════
-   CAPABILITIES
-═══════════════════════════════════════ */
 .cap-section{padding:100px 24px;background:var(--bg2)}
 .cap-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
 .cap-card{
@@ -1295,9 +1228,7 @@ nav{display:flex;align-items:center;gap:4px}
   border-radius:50%;flex-shrink:0;box-shadow:0 0 6px var(--green);
 }
 
-/* ═══════════════════════════════════════
-   PROCESS
-═══════════════════════════════════════ */
+
 .process-section{padding:100px 24px;position:relative;overflow:hidden}
 .process-section::before{
   content:'';position:absolute;
@@ -1356,9 +1287,7 @@ nav{display:flex;align-items:center;gap:4px}
 @keyframes beamFlow{0%{width:0;left:0}50%{width:100%;left:0}51%{width:100%;left:0}100%{width:0;left:100%}}
 .connector-arrow{color:var(--green);font-size:1rem;margin-left:-4px}
 
-/* ═══════════════════════════════════════
-   WHY CHOOSE
-═══════════════════════════════════════ */
+
 .why-section{padding:100px 24px;background:var(--bg2)}
 .why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .why-card{
@@ -1378,9 +1307,7 @@ nav{display:flex;align-items:center;gap:4px}
 }
 .why-desc{font-size:.85rem;color:var(--text2);line-height:1.8}
 
-/* ═══════════════════════════════════════
-   INDUSTRIES
-═══════════════════════════════════════ */
+
 .industries-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .ind-card{
   background:var(--card);border:1px solid var(--border);
@@ -1398,9 +1325,6 @@ nav{display:flex;align-items:center;gap:4px}
 .ind-sub{font-size:.8rem;color:var(--steel)}
 
 
-/* ═══════════════════════════════════════
-   MACHINES WE USE
-═══════════════════════════════════════ */
 .machines-section{padding:100px 24px;background:var(--bg)}
 .machines-grid{
   display:grid;grid-template-columns:repeat(2,1fr);gap:24px;
@@ -1444,9 +1368,7 @@ nav{display:flex;align-items:center;gap:4px}
 .machine-desc{font-size:.85rem;color:var(--text2);line-height:1.8}
 @media(max-width:768px){.machines-grid{grid-template-columns:1fr}}
 
-/* ═══════════════════════════════════════
-   GALLERY
-═══════════════════════════════════════ */
+
 #productionGalleryShell,
 .production-detail-view {
   padding: 0;
@@ -2475,9 +2397,7 @@ nav{display:flex;align-items:center;gap:4px}
   font-size:.95rem;
 }
 
-/* ═══════════════════════════════════════
-   LIGHTBOX
-═══════════════════════════════════════ */
+
 #lightbox{
   display:none;position:fixed;inset:0;z-index:9000;
   background:rgba(5,8,12,.95);backdrop-filter:blur(10px);
@@ -2643,9 +2563,7 @@ nav{display:flex;align-items:center;gap:4px}
 .lb-prev{left:16px}
 .lb-next{right:16px}
 
-/* ═══════════════════════════════════════
-   ENQUIRY / CONTACT
-═══════════════════════════════════════ */
+
 .enquiry-section{padding:100px 24px;background:var(--bg2)}
 .enquiry-grid{
   max-width:1280px;margin:0 auto;
@@ -2725,9 +2643,6 @@ nav{display:flex;align-items:center;gap:4px}
 .form-success h3{font-family:var(--ff-display);font-size:2rem;letter-spacing:.06em;color:var(--green);margin:16px 0 8px}
 .form-success p{color:var(--text2);font-size:.9rem}
 
-/* ═══════════════════════════════════════
-   AREAS WE SERVE
-═══════════════════════════════════════ */
 .areas-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .area-card{
   background:var(--card);border:1px solid var(--border);
@@ -2740,9 +2655,7 @@ nav{display:flex;align-items:center;gap:4px}
 @media(max-width:900px){.areas-grid{grid-template-columns:repeat(2,1fr)!important}}
 @media(max-width:480px){.areas-grid{grid-template-columns:repeat(1,1fr)!important}}
 
-/* ═══════════════════════════════════════
-   FAQ
-═══════════════════════════════════════ */
+
 .faq-item{
   background:var(--card);border:1px solid var(--border);
   border-radius:12px;overflow:hidden;
@@ -2769,9 +2682,6 @@ nav{display:flex;align-items:center;gap:4px}
 }
 .faq-item:hover{border-color:var(--border-green)}
 
-/* ═══════════════════════════════════════
-   MAP
-═══════════════════════════════════════ */
 .map-section{padding:0 24px 80px}
 .map-inner{max-width:1280px;margin:0 auto}
 .map-wrap{
@@ -2780,9 +2690,7 @@ nav{display:flex;align-items:center;gap:4px}
   box-shadow:0 0 40px rgba(0,0,0,.4);
 }
 
-/* ═══════════════════════════════════════
-   FOOTER
-═══════════════════════════════════════ */
+
 footer{
   background:var(--card);border-top:1px solid var(--border);
   padding:60px 24px 0;
@@ -2828,9 +2736,6 @@ footer{
 }
 .footer-bottom span{color:var(--green)}
 
-/* ═══════════════════════════════════════
-   FLOATING WHATSAPP
-═══════════════════════════════════════ */
 .wa-float{
   position:fixed;bottom:28px;right:28px;z-index:800;
   width:58px;height:58px;border-radius:50%;
@@ -2844,9 +2749,6 @@ footer{
 @keyframes waPulse{0%,100%{box-shadow:0 4px 20px rgba(37,211,102,.5),0 0 0 0 rgba(37,211,102,.4)}50%{box-shadow:0 4px 20px rgba(37,211,102,.5),0 0 0 14px rgba(37,211,102,0)}}
 .wa-icon{width:30px;height:30px}
 
-/* ═══════════════════════════════════════
-   MOBILE CTA BAR
-═══════════════════════════════════════ */
 .mobile-cta{
   display:none;
   position:fixed;bottom:0;left:0;right:0;z-index:700;
@@ -2866,9 +2768,7 @@ footer{
 .mob-cta-quote{background:var(--green);color:#000;font-weight:700;border-left:1px solid rgba(0,200,83,.3)}
 .mob-cta-quote:hover{background:var(--green2)}
 
-/* ═══════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════ */
+
 @media(max-width:1100px){
   .services-grid{grid-template-columns:repeat(2,1fr)}
   .why-grid{grid-template-columns:repeat(2,1fr)}
@@ -3112,7 +3012,7 @@ footer{
   }
 })();
 </script>
-<!-- ═══════════ CLIENTS TICKER ═══════════ -->
+
 <section class="clients-section">
   <div class="clients-label">TRUSTED BY INDUSTRIES ACROSS BANGALORE & BEYOND</div>
   <div class="ticker-wrap">
@@ -3129,7 +3029,7 @@ footer{
   </div>
 </section>
 
-<!-- ═══════════ ABOUT ═══════════ -->
+
 <section class="about-section">
   <div class="about-grid">
     <div class="reveal-left">
@@ -3170,7 +3070,6 @@ footer{
   </div>
 </section>
 
-<!-- ═══════════ SERVICES ═══════════ -->
 <section id="services" class="section">
   <div class="section-inner">
     <div class="section-head reveal">
@@ -3261,7 +3160,6 @@ footer{
   </div>
 </section>
 
-<!-- ═══════════ CAPABILITIES ═══════════ -->
 <section id="capabilities" class="cap-section">
   <div class="section-inner">
     <div class="section-head reveal">
@@ -3330,7 +3228,6 @@ footer{
   </div>
 </section>
 
-<!-- ═══════════ PROCESS ═══════════ -->
 <section id="process" class="process-section section">
   <div class="section-inner">
     <div class="section-head reveal">
@@ -3372,7 +3269,6 @@ footer{
   </div>
 </section>
 
-<!-- ═══════════ WHY CHOOSE US ═══════════ -->
 <section class="why-section">
   <div class="section-inner">
     <div class="section-head reveal">
@@ -3404,7 +3300,6 @@ footer{
   </div>
 </section>
 
-<!-- ═══════════ INDUSTRIES ═══════════ -->
 <section id="industries" class="section">
   <div class="section-inner">
     <div class="section-head reveal">
@@ -3440,7 +3335,6 @@ footer{
   </div>
 </section>
 
-<!-- ═══════════ MACHINES WE USE ═══════════ -->
 <section id="machines" class="machines-section">
   <div class="section-inner">
     <div class="section-head reveal">
@@ -3493,7 +3387,6 @@ footer{
   </div>
 </section>
 
-<!-- ═══════════ GALLERY ═══════════ -->
 <section id="production" class="section">
   <div class="section-inner">
     <div class="section-head reveal">
@@ -3559,7 +3452,6 @@ footer{
   <button class="lb-nav lb-next" onclick="event.stopPropagation();lightboxNav(1)">&#8594;</button>
 </div>
 
-<!-- QUOTE REQUEST MODAL -->
 <div id="quoteModal" class="quote-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="quoteModalTitle" hidden>
   <div class="quote-modal-backdrop" data-close-quote></div>
   <div class="quote-modal-panel">
@@ -3608,7 +3500,6 @@ footer{
   </div>
 </div>
 
-<!-- ═══════════ CONTACT ═══════════ -->
 <section id="contact" class="enquiry-section">
   <div class="section-inner">
     <div class="section-head reveal">
@@ -3703,7 +3594,6 @@ footer{
   </div>
 </section>
 
-<!-- ═══════════ AREAS WE SERVE ═══════════ -->
 <section class="section" style="background:var(--bg);padding-top:60px;padding-bottom:60px">
   <div class="section-inner">
     <div class="section-head reveal" style="margin-bottom:40px">
@@ -3764,7 +3654,6 @@ footer{
   </div>
 </section>
 
-<!-- ═══════════ FAQ ═══════════ -->
 <section id="faq" class="section" style="background:var(--bg2)">
   <div class="section-inner">
     <div class="section-head reveal">
@@ -3823,7 +3712,6 @@ footer{
   </div>
 </section>
 
-<!-- MAP -->
 <section class="map-section">
   <div class="map-inner">
     <div class="map-wrap">
@@ -3885,14 +3773,12 @@ footer{
   </div>
 </footer>
 
-<!-- FLOATING WHATSAPP -->
 <a href="https://wa.me/918892181792" class="wa-float" title="Chat on WhatsApp" target="_blank" rel="noopener noreferrer">
   <svg class="wa-icon" viewBox="0 0 24 24" fill="white">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
   </svg>
 </a>
 
-<!-- MOBILE CTA BAR -->
 <div class="mobile-cta">
   <a href="tel:+918892181792" class="mob-cta-btn mob-cta-call">📞 Call</a>
   <a href="https://wa.me/918892181792" class="mob-cta-btn mob-cta-wa" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
@@ -3905,6 +3791,32 @@ window.SBG_CONFIG=Object.assign({
   turnstileSiteKey:'0x4AAAAAADXr0G5pEekR28oa',
   serverlessBaseUrl:'/api'
 },window.SBG_CONFIG||{});
+</script>
+<script>
+(function(){
+  const fontHref='https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap';
+  function appendHint(rel,href,crossOrigin){
+    if(document.querySelector(`link[rel="${rel}"][href="${href}"]`))return;
+    const link=document.createElement('link');
+    link.rel=rel;
+    link.href=href;
+    if(crossOrigin)link.crossOrigin='anonymous';
+    document.head.append(link);
+  }
+  function loadSbgFonts(){
+    if(document.getElementById('sbgFontStyles'))return;
+    appendHint('preconnect','https://fonts.googleapis.com');
+    appendHint('preconnect','https://fonts.gstatic.com',true);
+    const link=document.createElement('link');
+    link.id='sbgFontStyles';
+    link.rel='stylesheet';
+    link.href=fontHref;
+    document.head.append(link);
+  }
+  const scheduleFonts=()=>setTimeout(loadSbgFonts,1500);
+  if(document.readyState==='complete')scheduleFonts();
+  else window.addEventListener('load',scheduleFonts,{once:true});
+})();
 </script>
 <script>
 (function(){

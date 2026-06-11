@@ -3572,6 +3572,7 @@ footer{
               </div>
             </div>
             <div class="captcha-field" data-turnstile="inquiry"></div>
+            <div id="quoteTurnstile" class="quote-turnstile"></div>
             <button class="btn-submit" type="button" onclick="submitForm()">Send Enquiry via WhatsApp →</button>
             <p class="form-note">* Clicking Send will open WhatsApp with your details pre-filled.</p>
           </div>
@@ -5976,6 +5977,10 @@ async function submitForm(){
     }
   ]
 }
+</script>
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+  async
+  defer>
 </script>
 </body>
 </html>

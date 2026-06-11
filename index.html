@@ -5061,10 +5061,6 @@ async function submitQuoteRequest(event){
   if(!details.mobile||!validPhone(details.mobile)){status.textContent='Please enter a valid mobile number.';return}
   if(!details.email||!validEmail(details.email)){status.textContent='Please enter a valid email address.';return}
   if(!details.city){status.textContent='Please enter your city.';return}
-  if(turnstileEnabled()&&!details.captchaToken){
-    status.textContent='Please complete the security check.';
-    return;
-  }
   const destinationWindow=window.open('about:blank','_blank');
   if(destinationWindow)destinationWindow.opener=null;
   form.querySelectorAll('.quote-send').forEach(button=>{button.disabled=true;});
@@ -5740,10 +5736,6 @@ async function submitForm(){
   const material=document.getElementById('fmaterial').value.trim().slice(0,160);
   const fullMessage=material?`Material: ${material}\n${message}`:message;
   const captchaTokenValue=captchaToken('inquiry',document);
-  if(turnstileEnabled()&&!captchaTokenValue){
-    alert('Please complete the security check.');
-    return;
-  }
   const button=document.querySelector('.btn-submit');
   if(button){button.disabled=true;button.textContent='Sending...'}
   const waMsg=encodeURIComponent(
@@ -5773,7 +5765,7 @@ async function submitForm(){
       source:'contact-section',
       captchaToken:captchaTokenValue
     };
-    if(turnstileEnabled()){
+    if(captchaTokenValue){
       await postJson(serverlessEndpoint('submit-inquiry'),inquiryPayload);
     }
     localStorage.setItem('sbg_last_inquiry',String(Date.now()));

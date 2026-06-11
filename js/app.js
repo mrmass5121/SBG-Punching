@@ -214,32 +214,128 @@ function formatDate(value) {
 }
 
 function bindForms() {
-  qs("#quote")?.addEventListener("submit", async event => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const status = qs("#formStatus");
-    const payload = Object.fromEntries(new FormData(form).entries());
-    if (payload.website) return;
-    status.textContent = "Submitting inquiry...";
+  const form = qs("#quote");
+  if (!form) return;
 
-    if (isSupabaseConfigured) {
-      const { error } = await supabase.from("inquiries").insert({
-        company_name: payload.company_name,
-        contact_name: payload.contact_name,
-        phone: payload.phone,
-        email: payload.email,
-        service: payload.service,
-        message: payload.message,
-        source: "contact-section"
-      });
-      if (error) {
-        status.textContent = "Could not submit right now. Please use phone or WhatsApp.";
-        return;
-      }
+  const status = qs("#formStatus");
+  let turnstileWidgetId = null;
+
+  const renderTurnstile = () => {
+    const holder = qs("#quoteTurnstile");
+
+    if (
+      !holder ||
+      !cfg.turnstileSiteKey ||
+      !window.turnstile ||
+      turnstileWidgetId !== null
+    ) {
+      return;
     }
 
-    status.textContent = "Inquiry received. We will contact you shortly.";
-    form.reset();
+    turnstileWidgetId = window.turnstile.render(holder, {
+      sitekey: cfg.turnstileSiteKey
+    });
+  };
+
+  const turnstileTimer = setInterval(() => {
+    if (window.turnstile) {
+      clearInterval(turnstileTimer);
+      renderTurnstile();
+    }
+  }, 300);
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton ? submitButton.textContent : "";
+
+    const payload = Object.fromEntries(new FormData(form).entries());
+
+    // Hidden honeypot field. If a bot fills it, silently stop.
+    if (payload.website) return;
+
+    const captchaToken =
+      turnstileWidgetId !== null && window.turnstile
+        ? window.turnstile.getResponse(turnstileWidgetId)
+        : "";
+
+    if (!captchaToken) {
+      status.textContent = "Please complete the security check.";
+      return;
+    }
+
+    const inquiryPayload = {
+      company_name: payload.company_name || "",
+      contact_name: payload.contact_name || "",
+      phone: payload.phone || "",
+      email: payload.email || "",
+      service: payload.service || "",
+      message: [
+        payload.material_thickness ? `Material / Thickness: ${payload.material_thickness}` : "",
+        payload.message || ""
+      ].filter(Boolean).join("\n\n"),
+      captchaToken
+    };
+
+    status.textContent = "Saving your inquiry...";
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Submitting...";
+    }
+
+    try {
+      const apiBase = cfg.serverlessBaseUrl || "/api";
+
+      const response = await fetch(`${apiBase}/submit-inquiry`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(inquiryPayload)
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.ok) {
+        status.textContent =
+          result.error || "Could not submit right now. Please use phone or WhatsApp.";
+        return;
+      }
+
+      const whatsappText = `Hello S.B.G. Punching,
+
+I need a quote.
+
+Name: ${inquiryPayload.contact_name}
+Company: ${inquiryPayload.company_name || "-"}
+Phone: ${inquiryPayload.phone}
+Email: ${inquiryPayload.email || "-"}
+Service Required: ${inquiryPayload.service}
+Requirement:
+${inquiryPayload.message}`;
+
+      const whatsappUrl = `https://wa.me/${cfg.whatsappNumber}?text=${encodeURIComponent(whatsappText)}`;
+
+      status.textContent = "Inquiry saved. WhatsApp will open now.";
+
+      form.reset();
+
+      if (turnstileWidgetId !== null && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId);
+      }
+
+      window.open(whatsappUrl, "_blank", "noopener");
+    } catch (error) {
+      console.error(error);
+      status.textContent = "Network error. Please try again or contact us on WhatsApp.";
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+    }
   });
 }
 

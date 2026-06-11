@@ -4764,6 +4764,33 @@ function renderTurnstileNearForms(){
   /* Safety fallback: start after 6s regardless */
   window.addEventListener('load',()=>setTimeout(start,6000),{once:true});
 })();
+
+/* ── Independent Turnstile bootstrap for the contact/quote form ──
+   The gallery-section observer above only fires when #production
+   scrolls into view. On product-detail pages or direct #contact
+   links the user may never pass #production, so we watch the
+   contact section separately and render the CAPTCHA widget as soon
+   as it is 400 px from the viewport — no waiting for the gallery.  */
+(function(){
+  let contactTurnstileDone=false;
+  function renderContactTurnstile(){
+    if(contactTurnstileDone)return;
+    contactTurnstileDone=true;
+    ensureSiteConfig().then(()=>renderTurnstileWidgets(document.getElementById('contact')||document));
+  }
+  const contactSection=document.getElementById('contact');
+  if(contactSection&&'IntersectionObserver' in window){
+    const obs=new IntersectionObserver(entries=>{
+      if(entries[0].isIntersecting){obs.disconnect();renderContactTurnstile();}
+    },{rootMargin:'400px 0px',threshold:0});
+    obs.observe(contactSection);
+  }else{
+    /* No IntersectionObserver — render immediately after load */
+    window.addEventListener('load',()=>setTimeout(renderContactTurnstile,500),{once:true});
+  }
+  /* Hard fallback: render after 3s even if section never intersects */
+  window.addEventListener('load',()=>setTimeout(renderContactTurnstile,3000),{once:true});
+})();
 /* ─── PRODUCTION DETAIL MODAL ─── */
 let lbProducts=[],lbIndex=0,lbImageIndex=0;
 function closeLightbox(){

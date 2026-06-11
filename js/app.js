@@ -260,11 +260,6 @@ function bindForms() {
         ? window.turnstile.getResponse(turnstileWidgetId)
         : "";
 
-    if (!captchaToken) {
-      status.textContent = "Please complete the security check.";
-      return;
-    }
-
     const inquiryPayload = {
       company_name: payload.company_name || "",
       contact_name: payload.contact_name || "",
@@ -278,7 +273,35 @@ function bindForms() {
       captchaToken
     };
 
-    status.textContent = "Saving your inquiry...";
+    const whatsappText = `Hello S.B.G. Punching,
+
+I need a quote.
+
+Name: ${inquiryPayload.contact_name}
+Company: ${inquiryPayload.company_name || "-"}
+Phone: ${inquiryPayload.phone}
+Email: ${inquiryPayload.email || "-"}
+Service Required: ${inquiryPayload.service}
+Requirement:
+${inquiryPayload.message}`;
+
+    const whatsappUrl = `https://wa.me/${cfg.whatsappNumber || "918892181792"}?text=${encodeURIComponent(whatsappText)}`;
+
+    const openWhatsapp = () => {
+      status.textContent = captchaToken
+        ? "Inquiry saved. WhatsApp will open now."
+        : "WhatsApp will open now.";
+
+      form.reset();
+
+      if (turnstileWidgetId !== null && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId);
+      }
+
+      window.open(whatsappUrl, "_blank", "noopener");
+    };
+
+    status.textContent = captchaToken ? "Saving your inquiry..." : "Opening WhatsApp...";
 
     if (submitButton) {
       submitButton.disabled = true;
@@ -286,6 +309,11 @@ function bindForms() {
     }
 
     try {
+      if (!captchaToken) {
+        openWhatsapp();
+        return;
+      }
+
       const apiBase = cfg.serverlessBaseUrl || "/api";
 
       const response = await fetch(`${apiBase}/submit-inquiry`, {
@@ -304,29 +332,7 @@ function bindForms() {
         return;
       }
 
-      const whatsappText = `Hello S.B.G. Punching,
-
-I need a quote.
-
-Name: ${inquiryPayload.contact_name}
-Company: ${inquiryPayload.company_name || "-"}
-Phone: ${inquiryPayload.phone}
-Email: ${inquiryPayload.email || "-"}
-Service Required: ${inquiryPayload.service}
-Requirement:
-${inquiryPayload.message}`;
-
-      const whatsappUrl = `https://wa.me/${cfg.whatsappNumber}?text=${encodeURIComponent(whatsappText)}`;
-
-      status.textContent = "Inquiry saved. WhatsApp will open now.";
-
-      form.reset();
-
-      if (turnstileWidgetId !== null && window.turnstile) {
-        window.turnstile.reset(turnstileWidgetId);
-      }
-
-      window.open(whatsappUrl, "_blank", "noopener");
+      openWhatsapp();
     } catch (error) {
       console.error(error);
       status.textContent = "Network error. Please try again or contact us on WhatsApp.";

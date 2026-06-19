@@ -1,4 +1,4 @@
-const CACHE_NAME = "sbg-punching-v19";
+const CACHE_NAME = "sbg-punching-v21";
 const APP_SHELL = [
   "css/admin.css",
   "js/admin.js",

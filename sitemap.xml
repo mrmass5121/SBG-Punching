@@ -51,4 +51,35 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- High-intent job work and location pages -->
+  <url>
+    <loc>https://www.sbgpunching.in/bar-bending-work-bangalore/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.sbgpunching.in/cnc-punching-job-work-bangalore/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.sbgpunching.in/laser-cutting-job-work-bangalore/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.sbgpunching.in/metal-fabricators-sunkadakatte/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <url>
+    <loc>https://www.sbgpunching.in/sheet-metal-fabricators-peenya/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
 </urlset>

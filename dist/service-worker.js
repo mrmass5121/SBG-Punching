@@ -1,12 +1,15 @@
-const CACHE_NAME = "sbg-punching-v16";
+const CACHE_NAME = "sbg-punching-v22";
 const APP_SHELL = [
-  "css/admin.css",
-  "js/admin.js",
-  "manifest.webmanifest",
-  "404.html",
-  "assets/logo.png",
-  "assets/images/og-industrial.svg",
-  "assets/videos/admin-storm-background.gif"
+  "/",
+  "/index.html",
+  "/404.html",
+  "/manifest.webmanifest",
+  "/css/style.css",
+  "/css/critical-inline.css",
+  "/js/home-config.js",
+  "/js/home-bootstrap.js",
+  "/assets/logo.png",
+  "/img/og-image.jpg"
 ];
 
 self.addEventListener("install", event => {
@@ -16,13 +19,15 @@ self.addEventListener("install", event => {
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
+
   const url = new URL(event.request.url);
   if (url.origin !== location.origin) return;
   if (
@@ -31,25 +36,25 @@ self.addEventListener("fetch", event => {
     url.pathname.startsWith("/.netlify/functions/") ||
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/supabase/") ||
-    url.pathname.endsWith("/js/config.js")
+    url.pathname.endsWith("/js/config.js") ||
+    url.pathname.endsWith("/js/speed-insights.js")
   ) return;
 
   if (event.request.mode === "navigate" || event.request.headers.get("accept")?.includes("text/html")) {
     event.respondWith(
-      fetch(event.request).then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        return response;
-      }).catch(() => caches.match(event.request).then(cached => cached || caches.match("index.html")))
+      fetch(event.request, { cache: "no-store" })
+        .catch(() => caches.match("/index.html"))
     );
     return;
   }
 
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
+      if (!response || !response.ok || response.type !== "basic") return response;
+
       const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)));
       return response;
-    }).catch(() => caches.match("index.html")))
+    }).catch(() => new Response("", { status: 408 })))
   );
 });

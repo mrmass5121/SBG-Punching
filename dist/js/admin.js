@@ -7,6 +7,7 @@ const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gi
 const maxBytes = (Number(cfg.maxUploadMb) || 20) * 1024 * 1024;
 const publicBucket = cfg.publicStorageBucket || cfg.storageBucket || "production-media-public";
 const privateBucket = cfg.privateStorageBucket || "production-media-private";
+const canonicalOrigin = "https://www.sbgpunching.in";
 
 let currentUser = null;
 let productions = [];
@@ -359,6 +360,7 @@ function bindDashboardUi() {
   bindConditionalFields();
   bindLightbox();
   bindMediaUpload();
+  bindUploadActions();
   bindMarketingVisibility();
   qsa("[data-entry-mode]").forEach(form => {
     form.addEventListener("submit", saveProduction);
@@ -385,15 +387,16 @@ function applyRoleAccess() {
 }
 
 function bindMarketingVisibility() {
-  const form = qs("#marketingForm");
-  const publicInput = form?.elements?.is_public;
-  const featuredInput = form?.elements?.featured;
-  if (!form || !publicInput || !featuredInput) return;
-  featuredInput.addEventListener("change", () => {
-    if (featuredInput.checked) publicInput.checked = true;
-  });
-  publicInput.addEventListener("change", () => {
-    if (!publicInput.checked) featuredInput.checked = false;
+  qsa("#marketingForm, #customisedForm").forEach(form => {
+    const publicInput = form?.elements?.is_public;
+    const featuredInput = form?.elements?.featured;
+    if (!publicInput || !featuredInput) return;
+    featuredInput.addEventListener("change", () => {
+      if (featuredInput.checked) publicInput.checked = true;
+    });
+    publicInput.addEventListener("change", () => {
+      if (!publicInput.checked) featuredInput.checked = false;
+    });
   });
 }
 
@@ -405,6 +408,7 @@ function showSection(name) {
     production: "Production Records",
     daily: "Daily Track Record",
     marketing: "Marketing Upload",
+    customised: "Customised Designs",
     services: "Marketing Showcase",
     inquiries: "Inquiries",
     reviews: "Reviews"
@@ -419,6 +423,7 @@ async function loadProductions() {
   renderFilterOptions();
   renderDashboard();
   renderAdminGallery();
+  if (inquiries.length) renderInquiries();
   repairPublicMediaRecords();
 }
 
@@ -527,27 +532,25 @@ function renderAdminGallery() {
       && (!filters.to || itemDate <= filters.to);
   });
   qs("#adminGallery").innerHTML = items.map(item => {
-    const media = (item.media || [])[0] || {};
     const mediaCount = (item.media || []).length;
-    const mediaHtml = secureMediaElement(media, item.title);
-    return `<article class="entry-card">
-      <button class="entry-media-button" type="button" data-preview-media="${item.id}" aria-label="Open preview for ${esc(item.title)}">
-        ${media.path || media.url ? mediaHtml : `<div class="empty-media"><i data-lucide="image"></i></div>`}
-        ${mediaCount ? `<em class="entry-media-count">${mediaCount} ${mediaCount === 1 ? "image" : "media"}</em>` : ""}
-        <span><i data-lucide="maximize-2"></i></span>
-      </button>
-      <div class="entry-card-content">
-        <span class="status-pill ${statusClass(item.status)}">${esc(item.status)}</span>
-        <h3>${esc(item.title)}</h3>
-        <p>${esc(item.category)} / ${esc(item.material || "Material TBC")} / Qty ${formatQuantity(productionQuantity(item))}</p>
+    return `<tr>
+      <td>${previewButton(item, "table-thumb")}${mediaCount > 1 ? `<em class="media-count-badge">${mediaCount}</em>` : ""}</td>
+      <td><strong>${esc(item.title)}</strong>${item.customer_name ? `<br><small>${esc(item.customer_name)}</small>` : ""}</td>
+      <td>${esc(item.category)}</td>
+      <td>${esc(item.material || "—")}</td>
+      <td>${formatQuantity(productionQuantity(item))}</td>
+      <td><span class="status-pill ${statusClass(item.status)}">${esc(item.status)}</span></td>
+      <td>${formatDate(item.production_date)}</td>
+      <td>${item.is_public ? "Yes" : "No"}</td>
+      <td>
         ${isFullAdmin() ? `<div class="entry-actions">
           <button class="btn btn-small btn-outline" data-edit="${item.id}"><i data-lucide="pencil"></i> Edit</button>
           <button class="btn btn-small btn-outline" data-toggle="${item.id}"><i data-lucide="${item.is_public ? "eye-off" : "eye"}"></i> ${item.is_public ? "Hide" : "Show"}</button>
           <button class="btn btn-small btn-outline danger" data-delete="${item.id}"><i data-lucide="trash-2"></i> Delete</button>
-        </div>` : `<p class="readonly-note">View only</p>`}
-      </div>
-    </article>`;
-  }).join("") || `<div class="panel">No entries found.</div>`;
+        </div>` : `<span class="readonly-note">View only</span>`}
+      </td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="9">No entries found.</td></tr>`;
   qsa("[data-edit]").forEach(btn => btn.addEventListener("click", () => editProduction(btn.dataset.edit)));
   qsa("[data-toggle]").forEach(btn => btn.addEventListener("click", () => togglePublic(btn.dataset.toggle)));
   qsa("[data-delete]").forEach(btn => btn.addEventListener("click", () => deleteProduction(btn.dataset.delete)));
@@ -570,7 +573,17 @@ function bindMediaUpload() {
   });
 }
 
+function bindUploadActions() {
+  qsa("[data-clear-media]").forEach(button => {
+    button.addEventListener("click", () => clearSelectedMedia(button.closest("form")));
+  });
+  qsa("[data-remove-current]").forEach(button => {
+    button.addEventListener("click", () => removeCurrentProduction(button.closest("form"), button));
+  });
+}
+
 function selectFiles(fileList, form) {
+  if (mediaForm !== form) uploadedMedia = [];
   mediaForm = form;
   selectedMedia = [...fileList].filter(file => {
     if (!allowedTypes.has(file.type)) {
@@ -582,8 +595,7 @@ function selectFiles(fileList, form) {
       return false;
     }
     return true;
-  }).slice(0, 8);
-  uploadedMedia = [];
+  }).slice(0, 20);
   renderSelectedMedia(form);
 }
 
@@ -599,7 +611,7 @@ function renderSelectedMedia(form) {
 }
 
 async function uploadSelectedMedia(form) {
-  if (!selectedMedia.length) return uploadedMedia;
+  if (!selectedMedia.length) return [];
   const progress = qs("[data-upload-progress]", form);
   const output = [];
   const isPrivate = form?.dataset.entryMode === "daily";
@@ -639,18 +651,26 @@ async function saveProduction(event) {
   event.preventDefault();
   const form = event.currentTarget;
   const isMarketing = form.dataset.entryMode === "marketing";
-  const status = qs(isMarketing ? "#marketingStatus" : "#dailyStatus");
+  const isCustomised = form.dataset.entryMode === "customised";
+  const statusId = isCustomised ? "#customisedStatus" : (isMarketing ? "#marketingStatus" : "#dailyStatus");
+  const status = qs(statusId);
   const values = Object.fromEntries(new FormData(form).entries());
   status.textContent = "Saving entry...";
   loading(true);
   try {
     const existing = productions.find(item => item.id === values.id);
     const hasNewMedia = mediaForm === form && selectedMedia.length;
-    let media = mediaForm === form ? (hasNewMedia ? await uploadSelectedMedia(form) : uploadedMedia) : (existing?.media || []);
+    const baseMedia = values.id ? (mediaForm === form ? uploadedMedia : (existing?.media || [])) : [];
+    let media = hasNewMedia ? [...baseMedia, ...await uploadSelectedMedia(form)] : baseMedia;
     const material = values.material === "Others" ? values.material_other.trim() : values.material;
     const thickness = values.thickness === "Others" ? values.thickness_other.trim() : values.thickness;
     const quantity = Math.max(1, Number.parseInt(values.quantity, 10) || 1);
-    const isPublic = isMarketing ? values.is_public === "on" || values.featured === "on" : false;
+    const isPublic = (isMarketing || isCustomised) ? values.is_public === "on" || values.featured === "on" : false;
+    const rawTags = values.tags ? stripQuantityTags(values.tags.split(",").map(tag => tag.trim()).filter(Boolean)) : [];
+    const designType = String(values.design_type || "").trim();
+    const tags = isCustomised
+      ? [...new Set(["customised-design", "custom-design", designType, ...rawTags].filter(Boolean))].slice(0, 12)
+      : rawTags.slice(0, 12);
     if (isPublic && media.some(isPrivateMedia)) {
       status.textContent = "Preparing public media...";
       media = await ensurePublicMedia(media);
@@ -665,9 +685,9 @@ async function saveProduction(event) {
       status: values.status,
       production_date: values.production_date,
       description: values.description.trim(),
-      tags: values.tags ? stripQuantityTags(values.tags.split(",").map(tag => tag.trim()).filter(Boolean)).slice(0, 12) : [],
+      tags,
       is_public: isPublic,
-      featured: isMarketing ? values.featured === "on" : false,
+      featured: (isMarketing || isCustomised) ? values.featured === "on" : false,
       media: media.length ? media : (existing?.media || [])
     };
     const { usedQuantityFallback } = await persistProduction(payload, values.id);
@@ -676,8 +696,10 @@ async function saveProduction(event) {
     syncOtherFields(form);
     setDefaultDate(form);
     if (form.elements.quantity) form.elements.quantity.value = "1";
-    status.textContent = usedQuantityFallback ? "Entry saved. Run the quantity database migration to store quantity as a real column." : (isMarketing ? "Marketing entry published." : "Daily record saved with media.");
-    toast(usedQuantityFallback ? "Saved with quantity fallback because the database column is missing." : (isMarketing ? "Marketing entry synced to the public website." : "Daily production record saved privately."));
+    const successMsg = usedQuantityFallback ? "Entry saved. Run the quantity database migration to store quantity as a real column." : isCustomised ? "Customised design published to the gallery." : isMarketing ? "Marketing entry published." : "Daily record saved with media.";
+    const toastMsg = usedQuantityFallback ? "Saved with quantity fallback because the database column is missing." : isCustomised ? "Customised design synced to the public gallery." : isMarketing ? "Marketing entry synced to the public website." : "Daily production record saved privately.";
+    status.textContent = successMsg;
+    toast(toastMsg);
     showSection("production");
     await loadProductions();
   } catch (error) {
@@ -691,13 +713,22 @@ function editProduction(id) {
   if (!isFullAdmin()) return toast("Standard users can upload new productions only.");
   const item = productions.find(row => row.id === id);
   if (!item) return;
-  showSection(item.is_public ? "marketing" : "daily");
-  const form = qs(item.is_public ? "#marketingForm" : "#dailyForm");
-  ["id", "title", "customer_name", "category", "status", "production_date", "description"].forEach(name => { form.elements[name].value = item[name] || ""; });
+  const isCustomised = item.category === "Customised Designs";
+  const section = isCustomised ? "customised" : (item.is_public ? "marketing" : "daily");
+  const formId = isCustomised ? "#customisedForm" : (item.is_public ? "#marketingForm" : "#dailyForm");
+  showSection(section);
+  const form = qs(formId);
+  ["id", "title", "customer_name", "status", "production_date", "description"].forEach(name => { form.elements[name].value = item[name] || ""; });
+  if (form.elements.category) form.elements.category.value = item.category || "";
+  if (form.elements.design_type) {
+    const designTypeOptions = ["Custom Fabrication","Custom Rack","Custom Bracket","Custom Panel","Custom Enclosure","Others"];
+    form.elements.design_type.value = item.design_type || item.tags?.find(t => designTypeOptions.includes(t)) || "Custom Fabrication";
+  }
   if (form.elements.quantity) form.elements.quantity.value = productionQuantity(item);
   setSelectOrOther(form.elements.material, item.material, form.elements.material_other);
   setSelectOrOther(form.elements.thickness, item.thickness, form.elements.thickness_other);
-  form.elements.tags.value = stripQuantityTags(item.tags || []).join(", ");
+  const internalTags = ["customised-design", "custom-design"];
+  form.elements.tags.value = stripQuantityTags(item.tags || []).filter(t => !internalTags.includes(t)).join(", ");
   if (form.elements.is_public?.type === "checkbox") form.elements.is_public.checked = Boolean(item.is_public);
   if (form.elements.featured?.type === "checkbox") form.elements.featured.checked = Boolean(item.featured);
   uploadedMedia = item.media || [];
@@ -732,6 +763,61 @@ async function deleteProduction(id) {
   const { error } = await supabase.from("productions").delete().eq("id", id);
   if (error) return toast(error.message);
   toast("Production entry deleted.");
+  await loadProductions();
+}
+
+function formStatus(form) {
+  return qs(".form-status", form) || qs(`#${form?.dataset?.entryMode || ""}Status`);
+}
+
+function setFormStatus(form, message) {
+  const status = formStatus(form);
+  if (status) status.textContent = message;
+}
+
+function clearSelectedMedia(form) {
+  if (!form) return;
+  if (mediaForm === form) selectedMedia = [];
+  qsa("[data-media-input]", form).forEach(input => { input.value = ""; });
+  qsa("[data-upload-progress]", form).forEach(progress => { progress.style.width = "0%"; });
+  if (mediaForm === form && uploadedMedia.length) {
+    renderUploadedMedia(form, { title: form.elements.title?.value || "Production media" });
+  } else {
+    qsa("[data-media-preview]", form).forEach(preview => { preview.innerHTML = ""; });
+  }
+  setFormStatus(form, uploadedMedia.length && mediaForm === form ? "New media selection removed. Saved media will stay attached." : "Media selection removed.");
+}
+
+async function removeCurrentProduction(form, button) {
+  if (!form) return;
+  if (!isFullAdmin()) return toast("Standard users cannot delete production records.");
+  const id = form.elements.id?.value;
+  if (!id) {
+    form.reset();
+    resetMedia(form);
+    syncOtherFields(form);
+    setDefaultDate(form);
+    if (form.elements.quantity) form.elements.quantity.value = "1";
+    setFormStatus(form, "Ready to add a new entry.");
+    return;
+  }
+  if (!confirm("Delete this production entry?")) return;
+  button.disabled = true;
+  setFormStatus(form, "Deleting entry...");
+  const { error } = await supabase.from("productions").delete().eq("id", id);
+  button.disabled = false;
+  if (error) {
+    setFormStatus(form, error.message);
+    return toast(error.message);
+  }
+  form.reset();
+  resetMedia(form);
+  syncOtherFields(form);
+  setDefaultDate(form);
+  if (form.elements.quantity) form.elements.quantity.value = "1";
+  setFormStatus(form, "Entry deleted.");
+  toast("Production entry deleted.");
+  showSection("production");
   await loadProductions();
 }
 
@@ -932,21 +1018,82 @@ function renderServices() {
   window.lucide?.createIcons();
 }
 
+function inquiryProductUrl(item) {
+  const direct = String(item?.product_url || "").trim();
+  if (direct) return direct;
+  const match = String(item?.message || "").match(/Product URL:\s*(https?:\/\/\S+)/i);
+  return match ? match[1] : "";
+}
+
+function inquiryProductSlug(item) {
+  const url = inquiryProductUrl(item);
+  if (!url) return "";
+  try {
+    const parsed = new URL(url, location.origin);
+    const productPath = parsed.pathname.match(/\/products\/([^/?#]+)/i);
+    if (productPath) return decodeURIComponent(productPath[1]);
+    const productParam = parsed.searchParams.get("product");
+    if (productParam) return productParam;
+  } catch (error) {}
+  return "";
+}
+
+function inquiryProduct(item) {
+  const slug = inquiryProductSlug(item);
+  const service = String(item?.service || "").trim().toLowerCase();
+  return productions.find(product => slug && productReviewKey(product) === slug)
+    || productions.find(product => service && String(product.title || "").trim().toLowerCase() === service)
+    || null;
+}
+
+function inquiryMessage(item, isGalleryQuote) {
+  const lines = String(item?.message || "")
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line =>
+      line &&
+      !/^Product URL:/i.test(line) &&
+      !/^Product Image:/i.test(line) &&
+      !/^Contact details were not collected/i.test(line)
+    );
+  if (!isGalleryQuote) return lines.join(" ").slice(0, 260);
+  const product = lines.find(line => /^Product:/i.test(line))?.replace(/^Product:\s*/i, "");
+  const category = lines.find(line => /^Category:/i.test(line))?.replace(/^Category:\s*/i, "");
+  const material = lines.find(line => /^Material:/i.test(line))?.replace(/^Material:\s*/i, "");
+  const summary = [
+    product ? `Quote requested for ${product}` : "Quote requested from production gallery",
+    category ? `Category: ${category}` : "",
+    material ? `Material: ${material}` : ""
+  ].filter(Boolean).join(". ");
+  return summary.slice(0, 260);
+}
+
 function renderInquiries() {
-  const fallbackMedia = productions.find(row => (row.media || []).length);
   qs("#inquiryRows").innerHTML = inquiries.map(item => {
-    const isQuoteClick = item.source === "quote-click";
+    const isGalleryQuote = ["production-gallery", "gallery-quote-click", "quote-click"].includes(item.source);
+    const sourceLabel = isGalleryQuote ? "Production Gallery" : "Contact Section";
+    const productUrl = inquiryProductUrl(item);
+    const product = inquiryProduct(item);
+    const message = inquiryMessage(item, isGalleryQuote);
     const contactMeta = [
       item.company_name,
-      isQuoteClick ? "Phone not collected" : item.phone,
+      isGalleryQuote ? "Phone not collected" : item.phone,
       item.email
     ].filter(Boolean).map(esc).join("<br>");
+
+    const previewCell = product ? previewButton(product, "table-thumb") : `<span class="table-thumb empty"><i data-lucide="image-off"></i></span>`;
+    const linkCell = productUrl
+      ? `<a href="${esc(productUrl)}" target="_blank" rel="noopener noreferrer">Open Product</a>`
+      : `<span class="readonly-note">-</span>`;
+
     return `
     <tr>
-      <td>${fallbackMedia ? previewButton(fallbackMedia, "table-thumb") : `<span class="table-thumb empty"><i data-lucide="image-off"></i></span>`}</td>
-      <td><strong>${esc(item.contact_name)}</strong>${isQuoteClick ? `<br><span class="status-pill queued">Product quote click</span>` : ""}${contactMeta ? `<br>${contactMeta}` : ""}</td>
+      <td>${previewCell}</td>
+      <td><strong>${esc(item.contact_name)}</strong>${isGalleryQuote ? `<br><span class="status-pill queued">Product quote click</span>` : ""}${contactMeta ? `<br>${contactMeta}` : ""}</td>
+      <td>${esc(sourceLabel)}</td>
       <td>${esc(item.service)}</td>
-      <td>${esc(item.message)}</td>
+      <td>${linkCell}</td>
+      <td>${esc(message)}</td>
       <td>${formatDate(item.created_at || item.updated_at)}</td>
       <td><span class="status-pill ${statusClass(item.status || "New")}">${esc(item.status || "New")}</span></td>
       <td>
@@ -957,7 +1104,7 @@ function renderInquiries() {
       </td>
     </tr>
   `;
-  }).join("") || `<tr><td colspan="7">No inquiries yet.</td></tr>`;
+  }).join("") || `<tr><td colspan="9">No inquiries yet.</td></tr>`;
   qsa("[data-inquiry]").forEach(btn => btn.addEventListener("click", () => markInquiry(btn.dataset.inquiry)));
   qsa("[data-delete-inquiry]").forEach(btn => btn.addEventListener("click", () => deleteInquiry(btn.dataset.deleteInquiry)));
   bindPreviewButtons();
@@ -999,7 +1146,8 @@ function productLiveUrl(slug) {
   const adminIndex = path.toLowerCase().indexOf("/admin/");
   const base = adminIndex >= 0 ? path.slice(0, adminIndex) : path.replace(/\/(?:admin\/?)?$/i, "");
   const cleanBase = (base || "").replace(/\/$/, "");
-  return `${location.origin}${cleanBase}/products/${encodeURIComponent(value)}`;
+  const origin = /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(location.host) ? location.origin : canonicalOrigin;
+  return `${origin}${cleanBase}/products/${encodeURIComponent(value)}`;
 }
 
 function reviewProductLink(review, product) {

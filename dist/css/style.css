@@ -42,6 +42,14 @@ img, video { display: block; max-width: 100%; }
 button, input, textarea, select { font: inherit; }
 button { border: 0; cursor: pointer; }
 svg { width: 1.05em; height: 1.05em; }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
 
 .skip-link {
   position: fixed;
@@ -317,7 +325,7 @@ h3 { font-size: clamp(1.65rem, 3vw, 2.35rem); }
   align-items: center;
 }
 .section-copy p, .section-head p { color: var(--muted); max-width: 720px; }
-.section-head { display: grid; gap: 14px; max-width: 900px; margin-bottom: 34px; }
+.section-head { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%; margin-bottom: 34px; }
 .spec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .spec-grid strong { display: block; margin-top: 6px; font-size: 1rem; }
 
@@ -515,7 +523,7 @@ blockquote cite { display: block; margin-top: 18px; color: var(--green); font-st
   align-items: start;
 }
 .contact-list { display: grid; gap: 10px; margin-top: 28px; }
-.contact-list a, .contact-list span {
+.contact-list .contact-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -525,6 +533,15 @@ blockquote cite { display: block; margin-top: 18px; color: var(--green); font-st
   border-radius: var(--radius);
   color: var(--muted);
   background: rgba(18,27,37,.58);
+}
+.contact-list .contact-item > span {
+  display: inline;
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
 }
 .contact-list svg { color: var(--green); }
 .quote-form { display: grid; gap: 12px; padding: 20px; }
@@ -590,6 +607,19 @@ blockquote cite { display: block; margin-top: 18px; color: var(--green); font-st
   transition: opacity .7s ease, transform .7s ease;
 }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+@supports (content-visibility: auto) {
+  .logo-strip,
+  .section,
+  .cap-section,
+  .why-section,
+  .testimonial-section,
+  .contact-section,
+  .site-footer {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 680px;
+  }
+}
 
 @media (max-width: 1100px) {
   .service-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

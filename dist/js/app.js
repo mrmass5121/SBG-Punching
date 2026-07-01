@@ -42,13 +42,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindForms();
   bindLightbox();
   bindWhatsapp();
+  registerServiceWorker();
   qs("#productionSearch")?.addEventListener("input", event => {
     searchTerm = event.target.value.trim().toLowerCase();
     renderCards();
   });
   await loadProductions();
   registerRealtime();
-  registerServiceWorker();
 });
 
 function bindNavigation() {
@@ -164,7 +164,7 @@ function renderCards() {
   }
   lightboxItems = items.flatMap(item => (item.media || []).map(media => ({ ...media, title: item.title, category: item.category })));
   gallery.innerHTML = items.map((item, index) => productionCard(item, index)).join("");
-  qsa("[data-preview]").forEach(button => button.addEventListener("click", () => openLightbox(Number(button.dataset.preview))));
+  qsa("[data-preview]", gallery).forEach(button => button.addEventListener("click", () => openLightbox(Number(button.dataset.preview))));
   window.lucide?.createIcons();
 }
 
@@ -175,7 +175,7 @@ function productionCard(item, index) {
     ? `<div class="empty-media"><i data-lucide="image"></i></div>`
     : media.type === "video"
     ? `<video src="${esc(src)}" muted playsinline preload="metadata"></video>`
-    : `<img src="${esc(src)}" alt="${esc(media.alt || item.title)}" loading="lazy">`;
+    : `<img src="${esc(src)}" alt="${esc(media.alt || item.title)}" loading="lazy" decoding="async">`;
   const lightboxOffset = lightboxItems.findIndex(entry => entry.title === item.title);
   return `
     <article class="production-card reveal is-visible">
@@ -214,32 +214,134 @@ function formatDate(value) {
 }
 
 function bindForms() {
-  qs("#quote")?.addEventListener("submit", async event => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const status = qs("#formStatus");
-    const payload = Object.fromEntries(new FormData(form).entries());
-    if (payload.website) return;
-    status.textContent = "Submitting inquiry...";
+  const form = qs("#quote");
+  if (!form) return;
 
-    if (isSupabaseConfigured) {
-      const { error } = await supabase.from("inquiries").insert({
-        company_name: payload.company_name,
-        contact_name: payload.contact_name,
-        phone: payload.phone,
-        email: payload.email,
-        service: payload.service,
-        message: payload.message,
-        source: "website"
-      });
-      if (error) {
-        status.textContent = "Could not submit right now. Please use phone or WhatsApp.";
-        return;
-      }
+  const status = qs("#formStatus");
+  let turnstileWidgetId = null;
+
+  const renderTurnstile = () => {
+    const holder = qs("#quoteTurnstile");
+
+    if (
+      !holder ||
+      !cfg.turnstileSiteKey ||
+      !window.turnstile ||
+      turnstileWidgetId !== null
+    ) {
+      return;
     }
 
-    status.textContent = "Inquiry received. We will contact you shortly.";
-    form.reset();
+    turnstileWidgetId = window.turnstile.render(holder, {
+      sitekey: cfg.turnstileSiteKey
+    });
+  };
+
+  const turnstileTimer = setInterval(() => {
+    if (window.turnstile) {
+      clearInterval(turnstileTimer);
+      renderTurnstile();
+    }
+  }, 300);
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton ? submitButton.textContent : "";
+
+    const payload = Object.fromEntries(new FormData(form).entries());
+
+    // Hidden honeypot field. If a bot fills it, silently stop.
+    if (payload.website) return;
+
+    const captchaToken =
+      turnstileWidgetId !== null && window.turnstile
+        ? window.turnstile.getResponse(turnstileWidgetId)
+        : "";
+
+    const inquiryPayload = {
+      company_name: payload.company_name || "",
+      contact_name: payload.contact_name || "",
+      phone: payload.phone || "",
+      email: payload.email || "",
+      service: payload.service || "",
+      message: [
+        payload.material_thickness ? `Material / Thickness: ${payload.material_thickness}` : "",
+        payload.message || ""
+      ].filter(Boolean).join("\n\n"),
+      captchaToken
+    };
+
+    const whatsappText = `Hello S.B.G. Punching,
+
+I need a quote.
+
+Name: ${inquiryPayload.contact_name}
+Company: ${inquiryPayload.company_name || "-"}
+Phone: ${inquiryPayload.phone}
+Email: ${inquiryPayload.email || "-"}
+Service Required: ${inquiryPayload.service}
+Requirement:
+${inquiryPayload.message}`;
+
+    const whatsappUrl = `https://wa.me/${cfg.whatsappNumber || "918892181792"}?text=${encodeURIComponent(whatsappText)}`;
+
+    const openWhatsapp = () => {
+      status.textContent = captchaToken
+        ? "Inquiry saved. WhatsApp will open now."
+        : "WhatsApp will open now.";
+
+      form.reset();
+
+      if (turnstileWidgetId !== null && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId);
+      }
+
+      window.open(whatsappUrl, "_blank", "noopener");
+    };
+
+    status.textContent = captchaToken ? "Saving your inquiry..." : "Opening WhatsApp...";
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Submitting...";
+    }
+
+    try {
+      if (!captchaToken) {
+        openWhatsapp();
+        return;
+      }
+
+      const apiBase = cfg.serverlessBaseUrl || "/api";
+
+      const response = await fetch(`${apiBase}/submit-inquiry`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(inquiryPayload)
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.ok) {
+        status.textContent =
+          result.error || "Could not submit right now. Please use phone or WhatsApp.";
+        return;
+      }
+
+      openWhatsapp();
+    } catch (error) {
+      console.error(error);
+      status.textContent = "Network error. Please try again or contact us on WhatsApp.";
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+    }
   });
 }
 
@@ -289,7 +391,7 @@ function renderLightbox() {
   }
   qs("#lightboxBody").innerHTML = item.type === "video"
     ? `<video src="${esc(src)}" controls autoplay playsinline></video><figcaption>${esc(item.title || "")}</figcaption>`
-    : `<img src="${esc(src)}" alt="${esc(item.alt || item.title || "Production preview")}"><figcaption>${esc(item.title || "")}</figcaption>`;
+    : `<img src="${esc(src)}" alt="${esc(item.alt || item.title || "Production preview")}" decoding="async"><figcaption>${esc(item.title || "")}</figcaption>`;
 }
 
 function registerServiceWorker() {

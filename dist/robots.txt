@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: https://sbgpunching.vercel.app/sitemap.xml
+Sitemap: https://www.sbgpunching.in/sitemap.xml

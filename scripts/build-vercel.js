@@ -30,6 +30,7 @@ const dirsToCopy = [
 ];
 
 const filesToCopy = [
+  ".well-known/security.txt",
   "index.html",
   "404.html",
   "manifest.webmanifest",

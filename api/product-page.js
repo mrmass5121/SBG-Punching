@@ -5,6 +5,14 @@ const DEFAULT_TITLE = "S.B.G. PUNCHING — Precision Metal Works, Bangalore";
 const DEFAULT_DESC = "CNC Punching, Laser Cutting, Sheet Metal Fabrication & Control Panels in Bangalore. 15+ years. 50K+ projects.";
 const PRODUCTION_ORIGIN = "https://www.sbgpunching.in";
 const DEFAULT_IMAGE = `${PRODUCTION_ORIGIN}/img/og-image.jpg`;
+const SECURITY_HEADERS = {
+  "X-Frame-Options": "DENY",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+  "Content-Security-Policy": "default-src 'self'; script-src 'self' 'sha256-tYGkC3y9QbRnJGm74Eqsl5hGkR/BL/Uj3dmMj0hI3mA=' 'sha256-dsWWoim39blxymYPBNXYhZ8KrQEBwXentcqwzdhCf4o=' 'sha256-8mYakfI8MHvmw7U7y4/0r3RHReG4+ma7P0++jnf32wE=' 'sha256-JE4p5XX3NudBdEVaP7dhsVzFduX4IzASsvwQ7Z9oxAE=' 'sha256-rhcEPv4/9Zj9PVFi2KV0I3WT8SsRc1473LM7BADFP9Y=' 'sha256-3+wdB936UWdal5+d8gzQeDrA7AUlqKKYMXDzkfjleWs=' 'sha256-XdeDNvj3n7gZptgnV0rLLmlUFr6XAmTmeJsIRCCU73E=' 'sha256-VZZ8QAsUJ4wq9lCytXrkUmxk1uqwiN4vRas9rNfQAZY=' 'sha256-CBd1tO1a0YQjK0IAcZcyDpp0r9uryTUnkGH8Uh8hrSQ=' https://cdn.jsdelivr.net https://unpkg.com https://challenges.cloudflare.com https://cdn.vercel-insights.com https://va.vercel-scripts.com; script-src-attr 'none'; style-src 'self' https://fonts.googleapis.com; style-src-attr 'none'; img-src 'self' data: blob: https://*.supabase.co; media-src 'self' blob: https://*.supabase.co; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://vitals.vercel-insights.com; frame-src https://challenges.cloudflare.com https://www.google.com https://maps.google.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests"
+};
 
 function esc(value) {
   return String(value || "").replace(/[&<>"']/g, ch => ({
@@ -195,5 +203,6 @@ module.exports = async function handler(request, response) {
   }
   response.setHeader("Content-Type", "text/html; charset=utf-8");
   response.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=86400");
+  Object.entries(SECURITY_HEADERS).forEach(([key, value]) => response.setHeader(key, value));
   response.status(200).send(replaceMeta(html, product, slug, origin));
 };

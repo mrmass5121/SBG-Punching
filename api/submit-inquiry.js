@@ -1,6 +1,10 @@
 const headers = {
   "Content-Type": "application/json",
-  "Cache-Control": "no-store"
+  "Cache-Control": "no-store",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
 };
 
 const clean = (value, max) => String(value || "").trim().slice(0, max);

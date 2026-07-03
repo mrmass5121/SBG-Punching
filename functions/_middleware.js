@@ -1,8 +1,13 @@
 const blockedPaths = [
+  /^\/\.env(?:\..*)?$/i,
+  /^\/\.git(?:\/.*)?$/i,
+  /^\/\.github(?:\/.*)?$/i,
   /^\/supabase(?:\/.*)?$/i,
   /^\/functions(?:\/.*)?$/i,
   /^\/netlify(?:\/.*)?$/i,
+  /^\/scripts(?:\/.*)?$/i,
   /^\/README\.md$/i,
+  /^\/package(?:-lock)?\.json$/i,
   /^\/wrangler\.toml$/i,
   /^\/netlify\.toml$/i,
   /^\/vercel\.json$/i,
